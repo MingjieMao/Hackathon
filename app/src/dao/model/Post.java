@@ -1,9 +1,11 @@
 package dao.model;
 
 import dao.MessageComparator;
+import moderation.ModerationTools;
 import sorteddata.SortedData;
 import sorteddata.SortedDataFactory;
 
+import java.util.Iterator;
 import java.util.UUID;
 
 public class Post implements HasUUID {
@@ -22,11 +24,24 @@ public class Post implements HasUUID {
 	public Post(UUID id) {
 		this(id, null, null);
 	}
-	
-	public SortedData<Message> getVisibleMessages(boolean isAdmin) {
-		// TODO: task 2
-		return null;
-	}
+
+    // task 2
+    public SortedData<Message> getVisibleMessages(boolean isAdmin) {
+        SortedData<Message> visibleMessages = SortedDataFactory.makeSortedData(MessageComparator.getInstance());
+
+        Iterator<Message> iterator = messages.getAll();
+        while (iterator.hasNext()) {
+            Message message = iterator.next();
+
+            // Admin users always can see messages, others only can see non-hidden messages.
+            if (isAdmin || !ModerationTools.isHidden(message.id())) {
+                visibleMessages.insert(message);
+            }
+        }
+
+        return visibleMessages;
+    }
+
 
 	public UUID getUUID() { return id; }
 }
