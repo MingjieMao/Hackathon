@@ -13,9 +13,11 @@ import java.util.*;
 
 public class ModerationTools {
 	private static final Map<UUID, Map<UUID, Report>> reports = new HashMap<>();
+	private static final Set<UUID> hiddenMessages = new HashSet<>();
 
-    // Task 2: hiddenMessages UUID。
-    private static final Set<UUID> hiddenMessages = new HashSet<>();
+
+	// ── task 1 ──────────────────────────────────────────────────────────────
+
 
 	public static boolean addReport(UUID message, UUID user, long timestamp) {
 		if (findMessage(message) == null) return false;
@@ -51,48 +53,71 @@ public class ModerationTools {
 		return byUser != null && byUser.containsKey(user);
 	}
 
-    // task 2
-    public static boolean setHidden(UUID message, UUID user, boolean hidden) {
-        User foundUser = UserDAO.getInstance().getByUUID(user);
-        if (foundUser == null) return false;
-        if (foundUser.role() != User.Role.Admin) return false;
 
-        if (!messageExists(message)) return false;
+	// ── task 2 ──────────────────────────────────────────────────────────────
 
-        // Update message state
-        if (hidden) {
-            hiddenMessages.add(message);
-        } else {
-            hiddenMessages.remove(message);
-        }
-        return true;
-    }
 
-    // To Post.getVisibleMessages
-    public static boolean isHidden(UUID message) {
-        return hiddenMessages.contains(message);
-    }
+	public static boolean setHidden(UUID message, UUID user, boolean hidden) {
+		if (findMessage(message) == null) return false;
+		User u = UserDAO.getInstance().getByUUID(user);
+		if (u == null || u.role() != User.Role.Admin) return false;
 
-    private static boolean messageExists(UUID message) {
-        if (message == null) return false;
 
-        Iterator<Message> allMessages = PostDAO.getInstance().getAllMessages();
-        while (allMessages.hasNext()) {
-            if (allMessages.next().id().equals(message)) return true;
-        }
-        return false;
-    }
+		if (hidden) hiddenMessages.add(message);
+		else hiddenMessages.remove(message);
+		return true;
+	}
 
-    private static boolean userExists(UUID user) {
-        if (user == null) return false;
-        return UserDAO.getInstance().getByUUID(user) != null;
-    }
+
+	public static boolean isHidden(UUID message) {
+		return hiddenMessages.contains(message);
+	}
+
+
+	// ── task 4 (stub) ────────────────────────────────────────────────────────
 
 
 	public static Iterator<Message> getReportedMessages(String strategy, int amount) {
 		// TODO: task 4
 		return null;
 	}
+
+
+	// ── persistence helpers (task 3) ─────────────────────────────────────────
+
+
+	public static Iterator<Report> getAllReports() {
+		List<Report> all = new ArrayList<>();
+		for (Map<UUID, Report> byUser : reports.values()) {
+			all.addAll(byUser.values());
+		}
+		return all.iterator();
+	}
+
+
+	public static Iterator<UUID> getAllHiddenIds() {
+		return new ArrayList<>(hiddenMessages).iterator();
+	}
+
+
+	public static void loadReport(Report r) {
+		reports.putIfAbsent(r.message, new HashMap<>());
+		reports.get(r.message).put(r.user, r);
+	}
+
+
+	public static void loadHidden(UUID messageId) {
+		hiddenMessages.add(messageId);
+	}
+
+
+	public static void clearAll() {
+		reports.clear();
+		hiddenMessages.clear();
+	}
+
+
+	// ── private helpers ──────────────────────────────────────────────────────
 
 
 	private static Message findMessage(UUID messageId) {
