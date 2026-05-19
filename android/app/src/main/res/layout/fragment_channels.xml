@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/channelsRoot"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/textChannelsMode"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/bg_pill"
+        android:paddingStart="14dp"
+        android:paddingTop="8dp"
+        android:paddingEnd="14dp"
+        android:paddingBottom="8dp"
+        android:textAppearance="?attr/textAppearanceTitleSmall"
+        android:textColor="@color/accent_on_soft"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/textChannelsTitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="18dp"
+        android:text="@string/channels_title"
+        android:textAppearance="?attr/textAppearanceHeadlineMedium"
+        android:textColor="@color/ink_primary"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/textChannelsSubtitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:textAppearance="?attr/textAppearanceBodyLarge"
+        android:textColor="@color/ink_secondary" />
+
+    <LinearLayout
+        android:id="@+id/cardChannelsHighlight"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="18dp"
+        android:background="@drawable/bg_card"
+        android:orientation="vertical"
+        android:padding="18dp">
+
+        <TextView
+            android:id="@+id/textChannelsHighlightTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/channels_highlight_title"
+            android:textAppearance="?attr/textAppearanceTitleMedium"
+            android:textColor="@color/ink_primary"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/textChannelsHighlightBody"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="@string/channels_highlight_body"
+            android:textAppearance="?attr/textAppearanceBodyMedium"
+            android:textColor="@color/ink_secondary" />
+
+        <Button
+            android:id="@+id/buttonChannelsQueue"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="14dp"
+            android:backgroundTint="@color/warning_ink"
+            android:text="@string/action_open_queue"
+            android:textAllCaps="false"
+            android:textColor="@color/white" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/textFeedHeading"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:text="@string/main_feed_heading"
+        android:textAppearance="?attr/textAppearanceTitleMedium"
+        android:textColor="@color/ink_primary"
+        android:textStyle="bold" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerPosts"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginTop="14dp"
+        android:layout_weight="1"
+        android:clipToPadding="false"
+        android:paddingBottom="12dp" />
+
+</LinearLayout>

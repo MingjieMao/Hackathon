@@ -1,0 +1,126 @@
+<resources>
+    <string name="app_name">Campus Moderation Demo</string>
+
+    <string name="main_title">Campus Flow</string>
+    <string name="main_feed_heading">Discussion Feed</string>
+    <string name="main_open_drawer">Open navigation drawer</string>
+    <string name="nav_channels">Channels</string>
+    <string name="nav_notifications">Notifications</string>
+    <string name="nav_you">You</string>
+    <string name="main_subtitle_member">Browse the forum as a member, open threads, and report replies that need moderator review.</string>
+    <string name="main_subtitle_admin">Browse every thread, inspect hidden replies, and open the moderation queue.</string>
+
+    <string name="mode_member">Member View</string>
+    <string name="mode_admin">Admin View</string>
+    <string name="viewer_unknown">Unknown viewer</string>
+    <string name="viewer_user_member">%1$s can report replies</string>
+    <string name="viewer_user_admin">%1$s moderates reports</string>
+
+    <string name="drawer_profile_heading">Profile</string>
+    <string name="drawer_change_avatar">Edit avatar</string>
+    <string name="drawer_workspace_title">Workspace</string>
+    <string name="drawer_workspace_subtitle">A slim navigation hub inspired by cleaner forum apps, with your settings anchored at the bottom.</string>
+    <string name="drawer_uid_label">UID</string>
+    <string name="drawer_nickname_label">Nickname</string>
+    <string name="drawer_quick_access">Quick Access</string>
+    <string name="drawer_home">Home Feed</string>
+    <string name="drawer_queue">Moderation Queue</string>
+    <string name="drawer_switch_member">Switch to Member View</string>
+    <string name="drawer_switch_admin">Switch to Admin View</string>
+    <string name="drawer_saved_drafts">Saved Drafts</string>
+    <string name="drawer_team_space">Team Space</string>
+    <string name="drawer_settings">Settings</string>
+    <string name="drawer_edit_uid">Edit UID</string>
+    <string name="drawer_edit_nickname">Edit nickname</string>
+    <string name="drawer_settings_desc">Open settings</string>
+
+    <string name="settings_title">Settings</string>
+    <string name="settings_language">Language</string>
+    <string name="settings_theme">Theme</string>
+    <string name="settings_language_en">English</string>
+    <string name="settings_language_zh">Chinese</string>
+    <string name="settings_theme_light">Light</string>
+    <string name="settings_theme_dark">Dark</string>
+    <string name="action_save">Save</string>
+    <string name="action_cancel">Cancel</string>
+    <string name="action_back">Back</string>
+    <string name="action_open_queue">Open Queue</string>
+    <string name="action_edit_nickname">Edit Nickname</string>
+    <string name="action_oldest_first">Oldest First</string>
+    <string name="action_most_reports">Most Reports</string>
+    <string name="action_restore">Restore</string>
+    <string name="action_hide">Hide</string>
+    <string name="action_report">Report</string>
+    <string name="action_undo_report">Undo Report</string>
+
+    <string name="dialog_edit_uid_title">Edit UID</string>
+    <string name="dialog_edit_nickname_title">Edit Nickname</string>
+    <string name="dialog_uid_hint">Enter a UID</string>
+    <string name="dialog_nickname_hint">Enter a nickname</string>
+    <string name="dialog_avatar_title">Choose an Avatar Style</string>
+
+    <string name="toast_switch_admin_required">Switch to admin view to review reports.</string>
+    <string name="toast_feature_coming_soon">This section is still a UI placeholder.</string>
+    <string name="toast_profile_saved">Profile updated.</string>
+    <string name="toast_action_failed">That action could not be completed.</string>
+    <string name="toast_reply_hidden">Reply hidden from members.</string>
+    <string name="toast_reply_restored">Reply restored for members.</string>
+    <string name="toast_reply_reported">Reply reported.</string>
+    <string name="toast_report_removed">Report removed.</string>
+
+    <string name="channels_title">Channel Stream</string>
+    <string name="channels_highlight_title">Today’s moderation snapshot</string>
+    <string name="channels_highlight_body">The feed stays simple and readable while we keep moderation controls within easy reach for the demo.</string>
+    <string name="channels_highlight_member">As a member, you can browse visible conversations and flag replies that need attention.</string>
+    <string name="channels_highlight_admin">As an admin, you can see every reply, open the report queue, and restore or hide content.</string>
+
+    <string name="notifications_title">Notifications</string>
+    <string name="notifications_subtitle">This tab is reserved for future alert and activity design.</string>
+    <string name="notifications_placeholder_title">Placeholder screen</string>
+    <string name="notifications_placeholder_body">We have not designed the notifications flow yet, but the tab is in place so the overall app shell feels complete.</string>
+
+    <string name="you_title">You</string>
+    <string name="you_subtitle">Profile editing lives here now, and the drawer entry point moves with it.</string>
+    <string name="you_uid_format">UID · %1$s</string>
+    <string name="you_mode_body">Use this panel to switch between member and admin perspectives while keeping your profile actions close by.</string>
+    <string name="you_tools_title">Moderation Tools</string>
+    <string name="you_tools_body">The report queue is still reachable from here when you switch into admin mode.</string>
+
+    <string name="post_meta_started_by">Started by %1$s</string>
+    <string name="post_summary_admin_hidden">%1$d replies • %2$d hidden from members</string>
+    <string name="post_summary_admin_visible">%1$d replies • everything visible</string>
+    <string name="post_summary_member_hidden">%1$d visible replies • %2$d hidden by moderators</string>
+    <string name="post_summary_member_visible">%1$d visible replies</string>
+
+    <string name="message_hidden_admin">Hidden from member view</string>
+    <string name="message_hidden_member">Hidden by moderators</string>
+    <string name="message_report_single">1 active report</string>
+    <string name="message_report_plural">%1$d active reports</string>
+    <string name="message_reported_by_you">Reported by you</string>
+    <string name="message_visible_admin">Visible to members</string>
+    <string name="message_visible_member">Visible reply</string>
+    <string name="message_author_line">%1$s • %2$s</string>
+
+    <string name="queue_sort_oldest">Sorted by oldest report</string>
+    <string name="queue_sort_most">Sorted by most active reports</string>
+    <string name="queue_subtitle_empty">%1$s • no reported replies right now</string>
+    <string name="queue_subtitle_count">%1$s • %2$d reported replies</string>
+    <string name="queue_title">Moderation Queue</string>
+    <string name="queue_empty">No reported replies right now. Switch back to member view and report a message to test the queue.</string>
+
+    <string name="reported_meta_format">%1$s • %2$s</string>
+    <string name="thread_unknown">Unknown thread</string>
+
+    <string name="thread_unavailable">Thread unavailable</string>
+    <string name="post_not_found">Post not found</string>
+    <string name="post_not_found_body">Return to the feed and open a different thread.</string>
+    <string name="post_not_found_summary">The selected post is no longer available.</string>
+
+    <string-array name="avatar_option_labels">
+        <item>Moss</item>
+        <item>Coral</item>
+        <item>Ocean</item>
+        <item>Plum</item>
+        <item>Sand</item>
+    </string-array>
+</resources>

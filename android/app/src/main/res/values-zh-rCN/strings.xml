@@ -1,0 +1,126 @@
+<resources>
+    <string name="app_name">校园内容审核演示</string>
+
+    <string name="main_title">Campus Flow</string>
+    <string name="main_feed_heading">讨论广场</string>
+    <string name="main_open_drawer">打开导航侧边栏</string>
+    <string name="nav_channels">频道</string>
+    <string name="nav_notifications">通知</string>
+    <string name="nav_you">我的</string>
+    <string name="main_subtitle_member">以普通成员身份浏览论坛、打开帖子，并举报需要管理员处理的回复。</string>
+    <string name="main_subtitle_admin">以管理员身份查看全部帖子、检查被隐藏的回复，并进入举报队列。</string>
+
+    <string name="mode_member">成员视图</string>
+    <string name="mode_admin">管理员视图</string>
+    <string name="viewer_unknown">未知用户</string>
+    <string name="viewer_user_member">%1$s 可以举报回复</string>
+    <string name="viewer_user_admin">%1$s 正在处理举报</string>
+
+    <string name="drawer_profile_heading">个人资料</string>
+    <string name="drawer_change_avatar">编辑头像</string>
+    <string name="drawer_workspace_title">工作区</string>
+    <string name="drawer_workspace_subtitle">整体布局会更偏简洁论坛风格，设置入口固定在底部，便于后续继续扩展。</string>
+    <string name="drawer_uid_label">UID</string>
+    <string name="drawer_nickname_label">昵称</string>
+    <string name="drawer_quick_access">快捷入口</string>
+    <string name="drawer_home">首页</string>
+    <string name="drawer_queue">举报队列</string>
+    <string name="drawer_switch_member">切换到成员视图</string>
+    <string name="drawer_switch_admin">切换到管理员视图</string>
+    <string name="drawer_saved_drafts">草稿箱</string>
+    <string name="drawer_team_space">团队空间</string>
+    <string name="drawer_settings">设置</string>
+    <string name="drawer_edit_uid">编辑 UID</string>
+    <string name="drawer_edit_nickname">编辑昵称</string>
+    <string name="drawer_settings_desc">打开设置</string>
+
+    <string name="settings_title">设置</string>
+    <string name="settings_language">语言</string>
+    <string name="settings_theme">主题</string>
+    <string name="settings_language_en">英文</string>
+    <string name="settings_language_zh">中文</string>
+    <string name="settings_theme_light">浅色</string>
+    <string name="settings_theme_dark">深色</string>
+    <string name="action_save">保存</string>
+    <string name="action_cancel">取消</string>
+    <string name="action_back">返回</string>
+    <string name="action_open_queue">打开队列</string>
+    <string name="action_edit_nickname">编辑昵称</string>
+    <string name="action_oldest_first">最早优先</string>
+    <string name="action_most_reports">最多举报</string>
+    <string name="action_restore">恢复</string>
+    <string name="action_hide">隐藏</string>
+    <string name="action_report">举报</string>
+    <string name="action_undo_report">撤销举报</string>
+
+    <string name="dialog_edit_uid_title">编辑 UID</string>
+    <string name="dialog_edit_nickname_title">编辑昵称</string>
+    <string name="dialog_uid_hint">输入 UID</string>
+    <string name="dialog_nickname_hint">输入昵称</string>
+    <string name="dialog_avatar_title">选择头像风格</string>
+
+    <string name="toast_switch_admin_required">请先切换到管理员视图再查看举报队列。</string>
+    <string name="toast_feature_coming_soon">这个区域目前还是 UI 占位。</string>
+    <string name="toast_profile_saved">资料已更新。</string>
+    <string name="toast_action_failed">这个操作暂时无法完成。</string>
+    <string name="toast_reply_hidden">该回复已对成员隐藏。</string>
+    <string name="toast_reply_restored">该回复已恢复显示。</string>
+    <string name="toast_reply_reported">已举报该回复。</string>
+    <string name="toast_report_removed">已撤销举报。</string>
+
+    <string name="channels_title">频道流</string>
+    <string name="channels_highlight_title">今日审核概览</string>
+    <string name="channels_highlight_body">主界面保持简洁，把需要展示给老师看的审核功能集中在容易到达的位置。</string>
+    <string name="channels_highlight_member">作为成员，你可以浏览可见对话，并标记需要管理员处理的回复。</string>
+    <string name="channels_highlight_admin">作为管理员，你可以查看全部回复、打开举报队列，并执行隐藏或恢复操作。</string>
+
+    <string name="notifications_title">通知</string>
+    <string name="notifications_subtitle">这个页面先作为占位，用来确定整体信息架构。</string>
+    <string name="notifications_placeholder_title">通知页占位</string>
+    <string name="notifications_placeholder_body">我们暂时还没有设计完整的通知流，但先把 tab 位置保留下来，保证整体 app shell 是完整的。</string>
+
+    <string name="you_title">我的</string>
+    <string name="you_subtitle">名字和头像的编辑先放到这里，汉堡入口也跟着移动到这个页面。</string>
+    <string name="you_uid_format">UID · %1$s</string>
+    <string name="you_mode_body">你可以在这里切换成员 / 管理员视角，同时把个人资料操作放在同一个区域里。</string>
+    <string name="you_tools_title">审核工具</string>
+    <string name="you_tools_body">切到管理员视角后，举报队列仍然可以从这里快速进入。</string>
+
+    <string name="post_meta_started_by">发起者：%1$s</string>
+    <string name="post_summary_admin_hidden">%1$d 条回复 • 其中 %2$d 条对成员隐藏</string>
+    <string name="post_summary_admin_visible">%1$d 条回复 • 全部可见</string>
+    <string name="post_summary_member_hidden">%1$d 条可见回复 • %2$d 条已被管理员隐藏</string>
+    <string name="post_summary_member_visible">%1$d 条可见回复</string>
+
+    <string name="message_hidden_admin">对成员隐藏中</string>
+    <string name="message_hidden_member">已被管理员隐藏</string>
+    <string name="message_report_single">1 条有效举报</string>
+    <string name="message_report_plural">%1$d 条有效举报</string>
+    <string name="message_reported_by_you">你已举报</string>
+    <string name="message_visible_admin">成员可见</string>
+    <string name="message_visible_member">可见回复</string>
+    <string name="message_author_line">%1$s • %2$s</string>
+
+    <string name="queue_sort_oldest">按最早举报排序</string>
+    <string name="queue_sort_most">按举报数量排序</string>
+    <string name="queue_subtitle_empty">%1$s • 当前没有被举报的回复</string>
+    <string name="queue_subtitle_count">%1$s • 共 %2$d 条被举报回复</string>
+    <string name="queue_title">举报队列</string>
+    <string name="queue_empty">当前没有被举报的回复。你可以先切回成员视图并举报一条消息来测试这个界面。</string>
+
+    <string name="reported_meta_format">%1$s • %2$s</string>
+    <string name="thread_unknown">未知帖子</string>
+
+    <string name="thread_unavailable">帖子不可用</string>
+    <string name="post_not_found">未找到帖子</string>
+    <string name="post_not_found_body">请返回首页并重新打开其他帖子。</string>
+    <string name="post_not_found_summary">当前选择的帖子已经不存在。</string>
+
+    <string-array name="avatar_option_labels">
+        <item>苔绿</item>
+        <item>珊瑚</item>
+        <item>海蓝</item>
+        <item>梅紫</item>
+        <item>沙金</item>
+    </string-array>
+</resources>

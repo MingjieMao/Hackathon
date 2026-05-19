@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+
+    <color name="page_background">#F5F5F7</color>
+    <color name="surface">#FFFFFFFF</color>
+    <color name="surface_alt">#EFEFF4</color>
+    <color name="surface_border">#D9D9DE</color>
+
+    <color name="ink_primary">#111111</color>
+    <color name="ink_secondary">#6E6E73</color>
+    <color name="ink_tertiary">#AEAEB2</color>
+
+    <color name="accent_strong">#111111</color>
+    <color name="accent_soft">#EFEFF4</color>
+    <color name="accent_on_soft">#111111</color>
+
+    <color name="warning_soft">#EFEFF4</color>
+    <color name="warning_ink">#1C1C1E</color>
+    <color name="danger_soft">#FDECEC</color>
+    <color name="danger_ink">#C33131</color>
+
+    <color name="avatar_moss">#1C1C1E</color>
+    <color name="avatar_coral">#3A3A3C</color>
+    <color name="avatar_ocean">#55585C</color>
+    <color name="avatar_plum">#6B6B70</color>
+    <color name="avatar_sand">#7C7C80</color>
+
+    <color name="tab_bar_fill">#F7F7FACC</color>
+    <color name="tab_bar_stroke">#DADAE0</color>
+    <color name="tab_indicator_fill_top">#FFFFFFFF</color>
+    <color name="tab_indicator_fill_bottom">#F5F5F9</color>
+    <color name="tab_indicator_stroke">#ECECF2</color>
+    <color name="nav_active">#111111</color>
+    <color name="nav_inactive">#8E8E93</color>
+</resources>
