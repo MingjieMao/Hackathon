@@ -52,12 +52,19 @@
     <string name="action_hide">隐藏</string>
     <string name="action_report">举报</string>
     <string name="action_undo_report">撤销举报</string>
+    <string name="action_new_post">发帖</string>
+    <string name="action_publish">发布</string>
 
     <string name="dialog_edit_uid_title">编辑 UID</string>
     <string name="dialog_edit_nickname_title">编辑昵称</string>
     <string name="dialog_uid_hint">输入 UID</string>
     <string name="dialog_nickname_hint">输入昵称</string>
     <string name="dialog_avatar_title">选择头像风格</string>
+    <string name="dialog_new_post_title">发布帖子</string>
+    <string name="dialog_post_title_hint">帖子标题</string>
+    <string name="dialog_post_body_hint">第一条回复，可不填</string>
+    <string name="compose_post_prompt">有什么新鲜事？</string>
+    <string name="compose_reply_scope">所有人可以回复</string>
 
     <string name="toast_switch_admin_required">请先切换到管理员视图再查看举报队列。</string>
     <string name="toast_feature_coming_soon">这个区域目前还是 UI 占位。</string>
@@ -67,6 +74,7 @@
     <string name="toast_reply_restored">该回复已恢复显示。</string>
     <string name="toast_reply_reported">已举报该回复。</string>
     <string name="toast_report_removed">已撤销举报。</string>
+    <string name="toast_post_created">帖子已发布。</string>
 
     <string name="channels_title">频道流</string>
     <string name="channels_highlight_title">今日审核概览</string>
@@ -80,7 +88,7 @@
     <string name="notifications_placeholder_body">我们暂时还没有设计完整的通知流，但先把 tab 位置保留下来，保证整体 app shell 是完整的。</string>
 
     <string name="you_title">我的</string>
-    <string name="you_subtitle">名字和头像的编辑先放到这里，汉堡入口也跟着移动到这个页面。</string>
+    <string name="you_subtitle">名字、头像和账号偏好设置都集中在这里，审核工具也保持可用。</string>
     <string name="you_uid_format">UID · %1$s</string>
     <string name="you_mode_body">你可以在这里切换成员 / 管理员视角，同时把个人资料操作放在同一个区域里。</string>
     <string name="you_tools_title">审核工具</string>
@@ -117,10 +125,15 @@
     <string name="post_not_found_summary">当前选择的帖子已经不存在。</string>
 
     <string-array name="avatar_option_labels">
-        <item>苔绿</item>
-        <item>珊瑚</item>
-        <item>海蓝</item>
-        <item>梅紫</item>
-        <item>沙金</item>
+        <item>浅蓝</item>
+        <item>雾蓝</item>
+        <item>浅青</item>
+        <item>浅绿</item>
+        <item>浅黄</item>
+        <item>浅橙</item>
+        <item>蜜桃</item>
+        <item>浅粉</item>
+        <item>浅玫红</item>
+        <item>浅紫</item>
     </string-array>
 </resources>

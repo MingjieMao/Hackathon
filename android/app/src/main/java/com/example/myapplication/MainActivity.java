@@ -309,8 +309,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void restartForAppearanceChange() {
+        UiPreferences.applyAppearance(this);
         recreate();
-        overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
     }
 
     private int resolveStartPage(Bundle savedInstanceState) {
@@ -352,6 +352,21 @@ public class MainActivity extends AppCompatActivity {
         label.setTextColor(selected ? activeColor : inactiveColor);
         label.setTypeface(selected ? Typeface.DEFAULT_BOLD : Typeface.DEFAULT);
         tab.setAlpha(selected ? 1.0f : 0.82f);
+        if (selected) {
+            icon.animate()
+                    .scaleX(1.18f)
+                    .scaleY(1.18f)
+                    .setDuration(120L)
+                    .withEndAction(() -> icon.animate()
+                            .scaleX(1.0f)
+                            .scaleY(1.0f)
+                            .setDuration(180L)
+                            .setInterpolator(new PathInterpolator(0.22f, 1f, 0.36f, 1f))
+                            .start())
+                    .start();
+        } else {
+            icon.animate().scaleX(1.0f).scaleY(1.0f).setDuration(120L).start();
+        }
         tab.animate()
                 .scaleX(selected ? 1.0f : 0.98f)
                 .scaleY(selected ? 1.0f : 0.98f)

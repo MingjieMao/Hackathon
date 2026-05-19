@@ -206,6 +206,20 @@ public final class AppData {
         return ModerationTools.addReport(message.id(), memberViewer.id(), now);
     }
 
+    public static Post createPost(String topic, String firstReply) {
+        ensurePopulated();
+        User poster = getCurrentUser();
+        if (poster == null || topic == null || topic.trim().isEmpty()) {
+            return null;
+        }
+
+        Post post = createPost(poster, topic.trim());
+        if (firstReply != null && !firstReply.trim().isEmpty()) {
+            addMessage(post, poster, System.currentTimeMillis(), firstReply.trim());
+        }
+        return post;
+    }
+
     public static boolean toggleHidden(Message message) {
         ensurePopulated();
         if (!adminMode || message == null || adminViewer == null) {

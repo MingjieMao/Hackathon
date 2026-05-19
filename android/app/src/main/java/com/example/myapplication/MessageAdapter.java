@@ -3,7 +3,8 @@ package com.example.myapplication;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
+import android.widget.ImageButton;
+import android.widget.PopupMenu;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -37,11 +38,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Message message = messages.get(position);
         holder.display(message);
-        holder.buttonMessageAction.setOnClickListener(v -> {
-            if (onMessageActionListener != null) {
-                onMessageActionListener.onPrimaryAction(message);
-            }
-        });
+        holder.buttonMessageMenu.setOnClickListener(v -> showMessageMenu(holder.buttonMessageMenu, message));
     }
 
     @Override
@@ -53,12 +50,24 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
         void onPrimaryAction(Message message);
     }
 
+    private void showMessageMenu(View anchor, Message message) {
+        PopupMenu menu = new PopupMenu(anchor.getContext(), anchor);
+        menu.getMenu().add(AppData.getMessageActionLabel(anchor.getContext(), message));
+        menu.setOnMenuItemClickListener(item -> {
+            if (onMessageActionListener != null) {
+                onMessageActionListener.onPrimaryAction(message);
+            }
+            return true;
+        });
+        menu.show();
+    }
+
     static class ViewHolder extends RecyclerView.ViewHolder {
         private final TextView textMessageAuthor;
         private final TextView textMessageTimestamp;
         private final TextView textMessageState;
         private final TextView textMessageContent;
-        private final Button buttonMessageAction;
+        private final ImageButton buttonMessageMenu;
 
         ViewHolder(View view) {
             super(view);
@@ -66,7 +75,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
             textMessageTimestamp = view.findViewById(R.id.textMessageTimestamp);
             textMessageState = view.findViewById(R.id.textMessageState);
             textMessageContent = view.findViewById(R.id.textMessageContent);
-            buttonMessageAction = view.findViewById(R.id.buttonMessageAction);
+            buttonMessageMenu = view.findViewById(R.id.buttonMessageMenu);
         }
 
         void display(Message message) {
@@ -74,7 +83,6 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
             textMessageTimestamp.setText(AppData.formatTimestamp(message.timestamp()));
             textMessageState.setText(AppData.getMessageStatus(itemView.getContext(), message));
             textMessageContent.setText(message.message());
-            buttonMessageAction.setText(AppData.getMessageActionLabel(itemView.getContext(), message));
         }
     }
 }

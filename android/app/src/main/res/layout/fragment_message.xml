@@ -55,13 +55,14 @@
             android:textAppearance="?attr/textAppearanceBodySmall"
             android:textColor="@color/ink_secondary" />
 
-        <Button
-            android:id="@+id/buttonMessageAction"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:backgroundTint="@color/accent_strong"
-            android:textAllCaps="false"
-            android:textColor="@color/white" />
+        <ImageButton
+            android:id="@+id/buttonMessageMenu"
+            android:layout_width="44dp"
+            android:layout_height="44dp"
+            android:background="@android:color/transparent"
+            android:contentDescription="@string/action_report"
+            android:padding="10dp"
+            android:src="@drawable/ic_more_horiz_24" />
     </LinearLayout>
 
 </LinearLayout>

@@ -3,7 +3,9 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:paddingTop="8dp">
+    android:paddingStart="34dp"
+    android:paddingTop="8dp"
+    android:paddingEnd="34dp">
 
     <TextView
         android:layout_width="match_parent"

@@ -52,12 +52,19 @@
     <string name="action_hide">Hide</string>
     <string name="action_report">Report</string>
     <string name="action_undo_report">Undo Report</string>
+    <string name="action_new_post">New Post</string>
+    <string name="action_publish">Publish</string>
 
     <string name="dialog_edit_uid_title">Edit UID</string>
     <string name="dialog_edit_nickname_title">Edit Nickname</string>
     <string name="dialog_uid_hint">Enter a UID</string>
     <string name="dialog_nickname_hint">Enter a nickname</string>
     <string name="dialog_avatar_title">Choose an Avatar Style</string>
+    <string name="dialog_new_post_title">Create Post</string>
+    <string name="dialog_post_title_hint">Post title</string>
+    <string name="dialog_post_body_hint">First reply, optional</string>
+    <string name="compose_post_prompt">What’s happening?</string>
+    <string name="compose_reply_scope">Everyone can reply</string>
 
     <string name="toast_switch_admin_required">Switch to admin view to review reports.</string>
     <string name="toast_feature_coming_soon">This section is still a UI placeholder.</string>
@@ -67,6 +74,7 @@
     <string name="toast_reply_restored">Reply restored for members.</string>
     <string name="toast_reply_reported">Reply reported.</string>
     <string name="toast_report_removed">Report removed.</string>
+    <string name="toast_post_created">Post created.</string>
 
     <string name="channels_title">Channel Stream</string>
     <string name="channels_highlight_title">Today’s moderation snapshot</string>
@@ -80,7 +88,7 @@
     <string name="notifications_placeholder_body">We have not designed the notifications flow yet, but the tab is in place so the overall app shell feels complete.</string>
 
     <string name="you_title">You</string>
-    <string name="you_subtitle">Profile editing lives here now, and the drawer entry point moves with it.</string>
+    <string name="you_subtitle">Profile editing lives here now, with account preferences and moderation tools close by.</string>
     <string name="you_uid_format">UID · %1$s</string>
     <string name="you_mode_body">Use this panel to switch between member and admin perspectives while keeping your profile actions close by.</string>
     <string name="you_tools_title">Moderation Tools</string>
@@ -117,10 +125,15 @@
     <string name="post_not_found_summary">The selected post is no longer available.</string>
 
     <string-array name="avatar_option_labels">
-        <item>Moss</item>
-        <item>Coral</item>
-        <item>Ocean</item>
-        <item>Plum</item>
-        <item>Sand</item>
+        <item>Soft Blue</item>
+        <item>Mist Blue</item>
+        <item>Soft Teal</item>
+        <item>Soft Green</item>
+        <item>Soft Yellow</item>
+        <item>Soft Orange</item>
+        <item>Peach</item>
+        <item>Soft Pink</item>
+        <item>Soft Magenta</item>
+        <item>Soft Purple</item>
     </string-array>
 </resources>

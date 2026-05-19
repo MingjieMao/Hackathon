@@ -2,6 +2,7 @@ package com.example.myapplication;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.core.os.LocaleListCompat;
@@ -17,6 +18,18 @@ public final class UiPreferences {
     private static final String DEFAULT_UID = "uid_2100_001";
     private static final String DEFAULT_NICKNAME = "Campus Buddy";
     private static final String DEFAULT_LANGUAGE_TAG = "en";
+    private static final int[] GOOGLE_COLORS = {
+            Color.rgb(205, 220, 255),
+            Color.rgb(208, 234, 236),
+            Color.rgb(135, 228, 215),
+            Color.rgb(179, 239, 162),
+            Color.rgb(255, 228, 126),
+            Color.rgb(255, 213, 190),
+            Color.rgb(255, 204, 188),
+            Color.rgb(255, 206, 216),
+            Color.rgb(255, 198, 238),
+            Color.rgb(228, 205, 255)
+    };
 
     private UiPreferences() {
     }
@@ -52,12 +65,24 @@ public final class UiPreferences {
         prefs(context).edit().putInt(KEY_AVATAR_INDEX, avatarIndex).apply();
     }
 
+    public static int getAvatarColor(Context context) {
+        return getGoogleColor(getAvatarIndex(context));
+    }
+
+    public static int getGoogleColor(int colorIndex) {
+        return GOOGLE_COLORS[normalizeColorIndex(colorIndex)];
+    }
+
+    public static int getGoogleColorCount() {
+        return GOOGLE_COLORS.length;
+    }
+
     public static String getLanguageTag(Context context) {
         return prefs(context).getString(KEY_LANGUAGE_TAG, DEFAULT_LANGUAGE_TAG);
     }
 
     public static void setLanguageTag(Context context, String languageTag) {
-        prefs(context).edit().putString(KEY_LANGUAGE_TAG, languageTag).apply();
+        prefs(context).edit().putString(KEY_LANGUAGE_TAG, languageTag).commit();
     }
 
     public static boolean isDarkTheme(Context context) {
@@ -65,10 +90,20 @@ public final class UiPreferences {
     }
 
     public static void setDarkTheme(Context context, boolean darkTheme) {
-        prefs(context).edit().putBoolean(KEY_DARK_THEME, darkTheme).apply();
+        prefs(context).edit().putBoolean(KEY_DARK_THEME, darkTheme).commit();
     }
 
     private static SharedPreferences prefs(Context context) {
         return context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
+    }
+
+    private static int normalizeColorIndex(int colorIndex) {
+        if (colorIndex < 0) {
+            return 0;
+        }
+        if (colorIndex >= GOOGLE_COLORS.length) {
+            return GOOGLE_COLORS.length - 1;
+        }
+        return colorIndex;
     }
 }

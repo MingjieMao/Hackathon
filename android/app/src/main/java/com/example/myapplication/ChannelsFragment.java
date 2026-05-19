@@ -6,6 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -41,9 +42,13 @@ public class ChannelsFragment extends Fragment implements RefreshablePage {
         textChannelsHighlightBody = view.findViewById(R.id.textChannelsHighlightBody);
         buttonChannelsQueue = view.findViewById(R.id.buttonChannelsQueue);
         recyclerPosts = view.findViewById(R.id.recyclerPosts);
+        ImageButton buttonChannelsDrawer = view.findViewById(R.id.buttonChannelsDrawer);
+        ImageButton buttonCreatePost = view.findViewById(R.id.buttonCreatePost);
 
         recyclerPosts.setLayoutManager(new LinearLayoutManager(requireContext()));
+        buttonChannelsDrawer.setOnClickListener(v -> host().openDrawer());
         buttonChannelsQueue.setOnClickListener(v -> openQueue());
+        buttonCreatePost.setOnClickListener(v -> startActivity(new Intent(requireContext(), CreatePostActivity.class)));
         refreshContent();
     }
 
@@ -93,5 +98,9 @@ public class ChannelsFragment extends Fragment implements RefreshablePage {
             return;
         }
         startActivity(new Intent(requireContext(), ModerationQueueActivity.class));
+    }
+
+    private MainActivity host() {
+        return (MainActivity) requireActivity();
     }
 }

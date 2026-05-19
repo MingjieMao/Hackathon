@@ -6,7 +6,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.ImageButton;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -34,7 +33,6 @@ public class YouFragment extends Fragment implements RefreshablePage {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        ImageButton buttonYouDrawer = view.findViewById(R.id.buttonYouDrawer);
         textYouAvatar = view.findViewById(R.id.textYouAvatar);
         textYouNickname = view.findViewById(R.id.textYouNickname);
         textYouUid = view.findViewById(R.id.textYouUid);
@@ -44,7 +42,6 @@ public class YouFragment extends Fragment implements RefreshablePage {
         buttonYouToggleMode = view.findViewById(R.id.buttonYouToggleMode);
         buttonYouQueue = view.findViewById(R.id.buttonYouQueue);
 
-        buttonYouDrawer.setOnClickListener(v -> host().openDrawer());
         buttonEditAvatar.setOnClickListener(v -> host().showAvatarPicker());
         buttonEditNickname.setOnClickListener(v -> host().showNicknameDialog());
         buttonYouToggleMode.setOnClickListener(v -> host().toggleViewerMode());
@@ -87,23 +84,8 @@ public class YouFragment extends Fragment implements RefreshablePage {
 
     private GradientDrawable makeAvatarBackground(int avatarIndex) {
         GradientDrawable drawable = (GradientDrawable) ContextCompat.getDrawable(requireContext(), R.drawable.bg_avatar_circle).mutate();
-        drawable.setColor(ContextCompat.getColor(requireContext(), getAvatarColorRes(avatarIndex)));
+        drawable.setColor(UiPreferences.getGoogleColor(avatarIndex));
         return drawable;
-    }
-
-    private int getAvatarColorRes(int avatarIndex) {
-        switch (avatarIndex) {
-            case 1:
-                return R.color.avatar_coral;
-            case 2:
-                return R.color.avatar_ocean;
-            case 3:
-                return R.color.avatar_plum;
-            case 4:
-                return R.color.avatar_sand;
-            default:
-                return R.color.avatar_moss;
-        }
     }
 
     private String getAvatarLetter(String nickname) {
