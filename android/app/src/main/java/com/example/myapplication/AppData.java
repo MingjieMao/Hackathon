@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
+import java.util.Locale;
 import java.util.UUID;
 
 import dao.PostDAO;
@@ -26,6 +27,7 @@ public final class AppData {
 
     private static boolean populated;
     private static boolean adminMode;
+    private static String populatedLanguage;
 
     private static User memberViewer;
     private static User adminViewer;
@@ -41,7 +43,8 @@ public final class AppData {
     }
 
     public static void ensurePopulated() {
-        if (populated) {
+        String currentLanguage = currentLanguageTag();
+        if (populated && currentLanguage.equals(populatedLanguage)) {
             return;
         }
 
@@ -55,6 +58,7 @@ public final class AppData {
 
         adminMode = false;
         populated = true;
+        populatedLanguage = currentLanguage;
     }
 
     public static boolean isAdminMode() {
@@ -277,7 +281,7 @@ public final class AppData {
         ensurePopulated();
         User user = UserDAO.getInstance().getByUUID(userId);
         if (user == null || user.username() == null) {
-            return "Unknown user";
+            return isChinese() ? "未知用户" : "Unknown user";
         }
         return user.username();
     }
@@ -313,32 +317,33 @@ public final class AppData {
 
     private static void seedForumThreads() {
         long now = System.currentTimeMillis();
+        boolean zh = isChinese();
 
-        Post teamworkPost = createPost(memberViewer, "How should we split Hackathon 2 work fairly?");
-        addMessage(teamworkPost, memberViewer, now - minutes(90), "We only have a short window. How would you divide UI, backend wiring, and demo prep?");
-        addMessage(teamworkPost, studyBuddy, now - minutes(82), "I would keep one person on Android layouts, one person on adapters and activities, and one person checking the backend integration.");
-        hiddenExampleMessage = addMessage(teamworkPost, lateCoder, now - minutes(71), "This question is basic. Read the brief before posting.");
-        addMessage(teamworkPost, adminViewer, now - minutes(65), "Let's keep replies constructive. A clean plan beats rushing at the last minute.");
+        Post teamworkPost = createPost(memberViewer, zh ? "第二次黑客松的工作怎么分配比较公平？" : "How should we split Hackathon 2 work fairly?");
+        addMessage(teamworkPost, memberViewer, now - minutes(90), zh ? "时间不多了。你们会怎么分配界面、后端连接和演示准备？" : "We only have a short window. How would you divide UI, backend wiring, and demo prep?");
+        addMessage(teamworkPost, studyBuddy, now - minutes(82), zh ? "我会让一个人负责安卓布局，一个人负责适配器和页面逻辑，一个人检查后端集成。" : "I would keep one person on Android layouts, one person on adapters and activities, and one person checking the backend integration.");
+        hiddenExampleMessage = addMessage(teamworkPost, lateCoder, now - minutes(71), zh ? "这个问题太基础了，发帖前先读一下要求吧。" : "This question is basic. Read the brief before posting.");
+        addMessage(teamworkPost, adminViewer, now - minutes(65), zh ? "我们尽量保持回复有建设性。清晰的计划比临时赶工更稳。" : "Let's keep replies constructive. A clean plan beats rushing at the last minute.");
 
-        Post featurePost = createPost(uxPilot, "Showcase ideas for the moderation dashboard");
-        addMessage(featurePost, uxPilot, now - minutes(54), "A lightweight admin queue could show reported replies, counts, and a quick hide action.");
-        queueExampleMessage = addMessage(featurePost, studyBuddy, now - minutes(49), "We could sort the queue by oldest report or by the number of reports to match the backend strategies.");
-        addMessage(featurePost, treeSage, now - minutes(44), "If we surface hidden status directly in the thread, the demo becomes much easier to understand.");
+        Post featurePost = createPost(uxPilot, zh ? "审核面板可以展示哪些功能？" : "Showcase ideas for the moderation dashboard");
+        addMessage(featurePost, uxPilot, now - minutes(54), zh ? "一个轻量的管理员队列可以显示被举报的回复、举报数量和快速隐藏操作。" : "A lightweight admin queue could show reported replies, counts, and a quick hide action.");
+        queueExampleMessage = addMessage(featurePost, studyBuddy, now - minutes(49), zh ? "队列可以按最早举报或举报数量排序，这样能对应后端策略。" : "We could sort the queue by oldest report or by the number of reports to match the backend strategies.");
+        addMessage(featurePost, treeSage, now - minutes(44), zh ? "如果在线程里直接显示隐藏状态，演示会更容易讲清楚。" : "If we surface hidden status directly in the thread, the demo becomes much easier to understand.");
 
-        Post reusePost = createPost(treeSage, "Can we reuse the week 7 Android prototype?");
-        addMessage(reusePost, treeSage, now - minutes(36), "The week 7 project already has a post list and thread screen, so reusing it should save a lot of time.");
-        addMessage(reusePost, memberViewer, now - minutes(31), "That sounds good, especially if we swap in the Hackathon 1 backend packages.");
-        addMessage(reusePost, adminViewer, now - minutes(28), "Exactly. Then we only need to add reporting, hiding, and a moderation queue.");
+        Post reusePost = createPost(treeSage, zh ? "可以复用第 7 周的安卓原型吗？" : "Can we reuse the week 7 Android prototype?");
+        addMessage(reusePost, treeSage, now - minutes(36), zh ? "第 7 周项目已经有帖子列表和详情页，复用它应该能省不少时间。" : "The week 7 project already has a post list and thread screen, so reusing it should save a lot of time.");
+        addMessage(reusePost, memberViewer, now - minutes(31), zh ? "听起来不错，尤其是如果能接上第一次黑客松的后端包。" : "That sounds good, especially if we swap in the Hackathon 1 backend packages.");
+        addMessage(reusePost, adminViewer, now - minutes(28), zh ? "没错。这样我们只需要补上举报、隐藏和审核队列。" : "Exactly. Then we only need to add reporting, hiding, and a moderation queue.");
 
-        Post explanationPost = createPost(studyBuddy, "Best way to explain AVL trees in 30 seconds");
-        addMessage(explanationPost, studyBuddy, now - minutes(24), "I want a version that makes sense to markers who only have a few seconds.");
-        addMessage(explanationPost, treeSage, now - minutes(20), "Describe them as self-balancing search trees that keep lookups fast by preventing tall, lopsided branches.");
-        addMessage(explanationPost, lateCoder, now - minutes(16), "If you show one before-and-after rotation, people usually understand it quickly.");
+        Post explanationPost = createPost(studyBuddy, zh ? "怎么用 30 秒讲清自平衡树？" : "Best way to explain AVL trees in 30 seconds");
+        addMessage(explanationPost, studyBuddy, now - minutes(24), zh ? "我想要一个老师几秒钟就能听懂的版本。" : "I want a version that makes sense to markers who only have a few seconds.");
+        addMessage(explanationPost, treeSage, now - minutes(20), zh ? "可以说它们是自平衡搜索树，通过避免树变得过高来保持查找高效。" : "Describe them as self-balancing search trees that keep lookups fast by preventing tall, lopsided branches.");
+        addMessage(explanationPost, lateCoder, now - minutes(16), zh ? "展示一次旋转前后的对比，通常就很容易理解。" : "If you show one before-and-after rotation, people usually understand it quickly.");
 
-        Post presentationPost = createPost(adminViewer, "What should the demo video focus on?");
-        addMessage(presentationPost, adminViewer, now - minutes(12), "I think we should show member reporting, then switch to admin mode and review the queue.");
-        addMessage(presentationPost, uxPilot, now - minutes(8), "That gives a clear cause-and-effect story and shows the extension is fully integrated.");
-        addMessage(presentationPost, memberViewer, now - minutes(5), "Agreed. It also proves hidden replies disappear for members but remain visible to admins.");
+        Post presentationPost = createPost(adminViewer, zh ? "演示视频应该重点展示什么？" : "What should the demo video focus on?");
+        addMessage(presentationPost, adminViewer, now - minutes(12), zh ? "我觉得应该先展示成员举报，再切到管理员视图查看队列。" : "I think we should show member reporting, then switch to admin mode and review the queue.");
+        addMessage(presentationPost, uxPilot, now - minutes(8), zh ? "这样因果关系很清楚，也能证明扩展功能已经完整接入。" : "That gives a clear cause-and-effect story and shows the extension is fully integrated.");
+        addMessage(presentationPost, memberViewer, now - minutes(5), zh ? "同意。也能证明隐藏回复对成员消失，但管理员仍然可见。" : "Agreed. It also proves hidden replies disappear for members but remain visible to admins.");
     }
 
     private static void seedModerationState() {
@@ -408,5 +413,13 @@ public final class AppData {
             builder.append(parts.get(i));
         }
         return builder.toString();
+    }
+
+    private static boolean isChinese() {
+        return currentLanguageTag().startsWith("zh");
+    }
+
+    private static String currentLanguageTag() {
+        return Locale.getDefault().toLanguageTag();
     }
 }

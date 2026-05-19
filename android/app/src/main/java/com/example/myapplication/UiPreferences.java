@@ -16,7 +16,6 @@ public final class UiPreferences {
     private static final String KEY_DARK_THEME = "dark_theme";
 
     private static final String DEFAULT_UID = "uid_2100_001";
-    private static final String DEFAULT_NICKNAME = "Campus Buddy";
     private static final String DEFAULT_LANGUAGE_TAG = "en";
     private static final int[] GOOGLE_COLORS = {
             Color.rgb(205, 220, 255),
@@ -50,7 +49,7 @@ public final class UiPreferences {
     }
 
     public static String getProfileNickname(Context context) {
-        return prefs(context).getString(KEY_NICKNAME, DEFAULT_NICKNAME);
+        return prefs(context).getString(KEY_NICKNAME, defaultNickname());
     }
 
     public static void setProfileNickname(Context context, String nickname) {
@@ -95,6 +94,10 @@ public final class UiPreferences {
 
     private static SharedPreferences prefs(Context context) {
         return context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
+    }
+
+    private static String defaultNickname() {
+        return java.util.Locale.getDefault().getLanguage().equals("zh") ? "校园伙伴" : "Campus Buddy";
     }
 
     private static int normalizeColorIndex(int colorIndex) {

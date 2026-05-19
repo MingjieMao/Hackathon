@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">校园内容审核演示</string>
 
-    <string name="main_title">Campus Flow</string>
+    <string name="main_title">校园流</string>
     <string name="main_feed_heading">讨论广场</string>
     <string name="main_open_drawer">打开导航侧边栏</string>
     <string name="nav_channels">频道</string>
@@ -20,7 +20,7 @@
     <string name="drawer_change_avatar">编辑头像</string>
     <string name="drawer_workspace_title">工作区</string>
     <string name="drawer_workspace_subtitle">整体布局会更偏简洁论坛风格，设置入口固定在底部，便于后续继续扩展。</string>
-    <string name="drawer_uid_label">UID</string>
+    <string name="drawer_uid_label">用户编号</string>
     <string name="drawer_nickname_label">昵称</string>
     <string name="drawer_quick_access">快捷入口</string>
     <string name="drawer_home">首页</string>
@@ -30,7 +30,7 @@
     <string name="drawer_saved_drafts">草稿箱</string>
     <string name="drawer_team_space">团队空间</string>
     <string name="drawer_settings">设置</string>
-    <string name="drawer_edit_uid">编辑 UID</string>
+    <string name="drawer_edit_uid">编辑用户编号</string>
     <string name="drawer_edit_nickname">编辑昵称</string>
     <string name="drawer_settings_desc">打开设置</string>
 
@@ -55,9 +55,9 @@
     <string name="action_new_post">发帖</string>
     <string name="action_publish">发布</string>
 
-    <string name="dialog_edit_uid_title">编辑 UID</string>
+    <string name="dialog_edit_uid_title">编辑用户编号</string>
     <string name="dialog_edit_nickname_title">编辑昵称</string>
-    <string name="dialog_uid_hint">输入 UID</string>
+    <string name="dialog_uid_hint">输入用户编号</string>
     <string name="dialog_nickname_hint">输入昵称</string>
     <string name="dialog_avatar_title">选择头像风格</string>
     <string name="dialog_new_post_title">发布帖子</string>
@@ -67,7 +67,7 @@
     <string name="compose_reply_scope">所有人可以回复</string>
 
     <string name="toast_switch_admin_required">请先切换到管理员视图再查看举报队列。</string>
-    <string name="toast_feature_coming_soon">这个区域目前还是 UI 占位。</string>
+    <string name="toast_feature_coming_soon">这个区域目前还是界面占位。</string>
     <string name="toast_profile_saved">资料已更新。</string>
     <string name="toast_action_failed">这个操作暂时无法完成。</string>
     <string name="toast_reply_hidden">该回复已对成员隐藏。</string>
@@ -85,11 +85,11 @@
     <string name="notifications_title">通知</string>
     <string name="notifications_subtitle">这个页面先作为占位，用来确定整体信息架构。</string>
     <string name="notifications_placeholder_title">通知页占位</string>
-    <string name="notifications_placeholder_body">我们暂时还没有设计完整的通知流，但先把 tab 位置保留下来，保证整体 app shell 是完整的。</string>
+    <string name="notifications_placeholder_body">我们暂时还没有设计完整的通知流，但先把标签页位置保留下来，保证整体应用外壳是完整的。</string>
 
     <string name="you_title">我的</string>
     <string name="you_subtitle">名字、头像和账号偏好设置都集中在这里，审核工具也保持可用。</string>
-    <string name="you_uid_format">UID · %1$s</string>
+    <string name="you_uid_format">用户编号 · %1$s</string>
     <string name="you_mode_body">你可以在这里切换成员 / 管理员视角，同时把个人资料操作放在同一个区域里。</string>
     <string name="you_tools_title">审核工具</string>
     <string name="you_tools_body">切到管理员视角后，举报队列仍然可以从这里快速进入。</string>
