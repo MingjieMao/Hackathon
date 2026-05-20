@@ -42,6 +42,7 @@
     </LinearLayout>
 
     <androidx.core.widget.NestedScrollView
+        android:id="@+id/postViewerScroll"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
@@ -208,6 +209,9 @@
                         android:layout_height="50dp"
                         android:layout_marginStart="12dp"
                         android:background="@drawable/bg_pill"
+                        android:clickable="true"
+                        android:contentDescription="@string/action_reply"
+                        android:focusable="true"
                         android:gravity="center"
                         android:minWidth="82dp"
                         android:orientation="horizontal"

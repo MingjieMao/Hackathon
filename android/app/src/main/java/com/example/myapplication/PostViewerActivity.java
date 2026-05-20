@@ -2,7 +2,9 @@ package com.example.myapplication;
 
 import android.os.Bundle;
 import android.text.InputType;
+import android.view.KeyEvent;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -17,10 +19,12 @@ import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+import androidx.core.widget.NestedScrollView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
+import java.util.UUID;
 
 import dao.model.Message;
 import dao.model.Post;
@@ -42,11 +46,14 @@ public class PostViewerActivity extends AppCompatActivity {
     private ImageView imagePostViewerCommunityAvatar;
     private ImageButton buttonPostUpvote;
     private ImageButton buttonPostDownvote;
+    private LinearLayout buttonPostComments;
     private Button buttonBack;
     private ImageButton buttonPostMenu;
+    private NestedScrollView postViewerScroll;
     private RecyclerView recyclerMessages;
     private Post post;
     private Message rootMessage;
+    private UUID pendingScrollMessageId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,13 +61,18 @@ public class PostViewerActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_post_viewer);
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.postViewerRoot), (v, insets) -> {
+        View postViewerRoot = findViewById(R.id.postViewerRoot);
+        int initialPaddingLeft = postViewerRoot.getPaddingLeft();
+        int initialPaddingTop = postViewerRoot.getPaddingTop();
+        int initialPaddingRight = postViewerRoot.getPaddingRight();
+        int initialPaddingBottom = postViewerRoot.getPaddingBottom();
+        ViewCompat.setOnApplyWindowInsetsListener(postViewerRoot, (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(
-                    v.getPaddingLeft(),
-                    systemBars.top + v.getPaddingTop(),
-                    v.getPaddingRight(),
-                    systemBars.bottom + v.getPaddingBottom()
+                    initialPaddingLeft,
+                    systemBars.top + initialPaddingTop,
+                    initialPaddingRight,
+                    systemBars.bottom + initialPaddingBottom
             );
             return insets;
         });
@@ -75,10 +87,12 @@ public class PostViewerActivity extends AppCompatActivity {
         textPostViewerCommentsCount = findViewById(R.id.textPostViewerCommentsCount);
         textCommentsEmpty = findViewById(R.id.textCommentsEmpty);
         imagePostViewerCommunityAvatar = findViewById(R.id.imagePostViewerCommunityAvatar);
+        buttonPostComments = findViewById(R.id.textPostViewerComments);
         buttonPostUpvote = findViewById(R.id.buttonPostUpvote);
         buttonPostDownvote = findViewById(R.id.buttonPostDownvote);
         buttonBack = findViewById(R.id.buttonBack);
         buttonPostMenu = findViewById(R.id.buttonPostMenu);
+        postViewerScroll = findViewById(R.id.postViewerScroll);
         recyclerMessages = findViewById(R.id.recyclerMessages);
 
         recyclerMessages.setLayoutManager(new LinearLayoutManager(this));
@@ -103,6 +117,7 @@ public class PostViewerActivity extends AppCompatActivity {
                 handleMessageAction(rootMessage);
             }
         });
+        buttonPostComments.setOnClickListener(v -> showReplyDialog(rootMessage));
     }
 
     @Override
@@ -154,36 +169,7 @@ public class PostViewerActivity extends AppCompatActivity {
         });
         adapter.setOnMessageReplyListener(this::showReplyDialog);
         recyclerMessages.setAdapter(adapter);
-    }
-
-    private void showReplyDialog(Message parent) {
-        EditText input = new EditText(this);
-        input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_MULTI_LINE | InputType.TYPE_TEXT_FLAG_CAP_SENTENCES);
-        input.setMinLines(3);
-        input.setHint(R.string.dialog_reply_body_hint);
-        int horizontal = Math.round(16 * getResources().getDisplayMetrics().density);
-        int vertical = Math.round(12 * getResources().getDisplayMetrics().density);
-        input.setPadding(horizontal, vertical, horizontal, vertical);
-
-        androidx.appcompat.app.AlertDialog dialog = new MaterialAlertDialogBuilder(this)
-                .setTitle(R.string.dialog_reply_title)
-                .setView(input)
-                .setNegativeButton(R.string.action_cancel, null)
-                .setPositiveButton(R.string.action_reply, null)
-                .create();
-
-        dialog.setOnShowListener(unused -> dialog.getButton(androidx.appcompat.app.AlertDialog.BUTTON_POSITIVE)
-                .setOnClickListener(v -> {
-                    Message reply = AppData.createReply(parent, input.getText().toString());
-                    if (reply == null) {
-                        input.setError(getString(R.string.dialog_reply_body_hint));
-                        return;
-                    }
-                    dialog.dismiss();
-                    Toast.makeText(this, getString(R.string.toast_reply_created), Toast.LENGTH_SHORT).show();
-                    refreshUi();
-                }));
-        dialog.show();
+        scrollToPendingReply(messages);
     }
 
     private void updatePostVoteColors() {
@@ -244,5 +230,109 @@ public class PostViewerActivity extends AppCompatActivity {
                 : getString(R.string.toast_report_removed));
         Toast.makeText(this, feedback, Toast.LENGTH_SHORT).show();
         refreshUi();
+    }
+
+    private void showReplyDialog(Message parent) {
+        if (post == null || parent == null) {
+            Toast.makeText(this, getString(R.string.toast_action_failed), Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        EditText input = new EditText(this);
+        input.setInputType(InputType.TYPE_CLASS_TEXT
+                | InputType.TYPE_TEXT_FLAG_CAP_SENTENCES
+                | InputType.TYPE_TEXT_FLAG_AUTO_CORRECT);
+        input.setSingleLine(false);
+        input.setMinLines(2);
+        input.setMaxLines(4);
+        input.setImeOptions(EditorInfo.IME_ACTION_SEND);
+        input.setHint(R.string.dialog_reply_body_hint);
+        int horizontal = dp(16);
+        int vertical = dp(12);
+        input.setPadding(horizontal, vertical, horizontal, vertical);
+
+        androidx.appcompat.app.AlertDialog dialog = new MaterialAlertDialogBuilder(this)
+                .setTitle(R.string.dialog_reply_title)
+                .setView(input)
+                .setNegativeButton(R.string.action_cancel, null)
+                .setPositiveButton(R.string.action_reply, null)
+                .create();
+
+        dialog.setOnShowListener(unused -> {
+            dialog.getButton(androidx.appcompat.app.AlertDialog.BUTTON_POSITIVE)
+                    .setOnClickListener(v -> publishReply(input, parent, dialog));
+            input.setOnEditorActionListener((v, actionId, event) -> {
+                boolean sendAction = actionId == EditorInfo.IME_ACTION_SEND;
+                boolean enterUp = event != null
+                        && event.getKeyCode() == KeyEvent.KEYCODE_ENTER
+                        && event.getAction() == KeyEvent.ACTION_UP;
+                if (sendAction || enterUp) {
+                    publishReply(input, parent, dialog);
+                    return true;
+                }
+                return false;
+            });
+            input.setOnKeyListener((v, keyCode, event) -> {
+                if (keyCode == KeyEvent.KEYCODE_ENTER && event.getAction() == KeyEvent.ACTION_UP) {
+                    publishReply(input, parent, dialog);
+                    return true;
+                }
+                return false;
+            });
+        });
+        dialog.show();
+        input.requestFocus();
+    }
+
+    private void publishReply(EditText input, Message parent, androidx.appcompat.app.AlertDialog dialog) {
+        String content = input.getText().toString().trim();
+        if (content.isEmpty()) {
+            input.setError(getString(R.string.dialog_reply_body_hint));
+            return;
+        }
+
+        Message reply = AppData.createReply(parent, content);
+        if (reply == null) {
+            Toast.makeText(this, getString(R.string.toast_action_failed), Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        pendingScrollMessageId = reply.id();
+        Toast.makeText(this, getString(R.string.toast_reply_created), Toast.LENGTH_SHORT).show();
+        dialog.dismiss();
+        refreshUi();
+    }
+
+    private void scrollToPendingReply(ArrayList<Message> messages) {
+        if (pendingScrollMessageId == null) {
+            return;
+        }
+
+        int targetPosition = -1;
+        for (int i = 0; i < messages.size(); i++) {
+            if (pendingScrollMessageId.equals(messages.get(i).id())) {
+                targetPosition = i;
+                break;
+            }
+        }
+        pendingScrollMessageId = null;
+
+        if (targetPosition >= 0) {
+            int position = targetPosition;
+            recyclerMessages.post(() -> {
+                RecyclerView.ViewHolder holder = recyclerMessages.findViewHolderForAdapterPosition(position);
+                if (holder == null) {
+                    postViewerScroll.smoothScrollTo(0, recyclerMessages.getBottom());
+                    return;
+                }
+
+                int targetY = recyclerMessages.getTop() + holder.itemView.getTop();
+                postViewerScroll.smoothScrollTo(0, Math.max(0, targetY - dp(12)));
+            });
+        }
+    }
+
+    private int dp(int value) {
+        return Math.round(value * getResources().getDisplayMetrics().density);
     }
 }
