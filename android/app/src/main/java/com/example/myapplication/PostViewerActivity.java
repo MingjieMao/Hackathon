@@ -2,9 +2,7 @@ package com.example.myapplication;
 
 import android.os.Bundle;
 import android.text.InputType;
-import android.view.KeyEvent;
 import android.view.View;
-import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -240,12 +238,12 @@ public class PostViewerActivity extends AppCompatActivity {
 
         EditText input = new EditText(this);
         input.setInputType(InputType.TYPE_CLASS_TEXT
+                | InputType.TYPE_TEXT_FLAG_MULTI_LINE
                 | InputType.TYPE_TEXT_FLAG_CAP_SENTENCES
                 | InputType.TYPE_TEXT_FLAG_AUTO_CORRECT);
         input.setSingleLine(false);
         input.setMinLines(2);
         input.setMaxLines(4);
-        input.setImeOptions(EditorInfo.IME_ACTION_SEND);
         input.setHint(R.string.dialog_reply_body_hint);
         int horizontal = dp(16);
         int vertical = dp(12);
@@ -261,24 +259,6 @@ public class PostViewerActivity extends AppCompatActivity {
         dialog.setOnShowListener(unused -> {
             dialog.getButton(androidx.appcompat.app.AlertDialog.BUTTON_POSITIVE)
                     .setOnClickListener(v -> publishReply(input, parent, dialog));
-            input.setOnEditorActionListener((v, actionId, event) -> {
-                boolean sendAction = actionId == EditorInfo.IME_ACTION_SEND;
-                boolean enterUp = event != null
-                        && event.getKeyCode() == KeyEvent.KEYCODE_ENTER
-                        && event.getAction() == KeyEvent.ACTION_UP;
-                if (sendAction || enterUp) {
-                    publishReply(input, parent, dialog);
-                    return true;
-                }
-                return false;
-            });
-            input.setOnKeyListener((v, keyCode, event) -> {
-                if (keyCode == KeyEvent.KEYCODE_ENTER && event.getAction() == KeyEvent.ACTION_UP) {
-                    publishReply(input, parent, dialog);
-                    return true;
-                }
-                return false;
-            });
         });
         dialog.show();
         input.requestFocus();
