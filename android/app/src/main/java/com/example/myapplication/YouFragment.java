@@ -1,0 +1,112 @@
+package com.example.myapplication;
+
+import android.graphics.drawable.GradientDrawable;
+import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.LinearLayout;
+import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
+import androidx.fragment.app.Fragment;
+
+import java.util.Locale;
+
+public class YouFragment extends Fragment implements RefreshablePage {
+    private TextView textYouAvatar;
+    private TextView textYouNickname;
+    private TextView textYouUid;
+    private TextView textYouLanguageValue;
+    private TextView textYouThemeValue;
+    private TextView textYouMode;
+    private Button buttonYouToggleMode;
+    private Button buttonYouQueue;
+
+    @Nullable
+    @Override
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
+                             @Nullable Bundle savedInstanceState) {
+        return inflater.inflate(R.layout.fragment_you, container, false);
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        textYouAvatar = view.findViewById(R.id.textYouAvatar);
+        textYouNickname = view.findViewById(R.id.textYouNickname);
+        textYouUid = view.findViewById(R.id.textYouUid);
+        textYouLanguageValue = view.findViewById(R.id.textYouLanguageValue);
+        textYouThemeValue = view.findViewById(R.id.textYouThemeValue);
+        textYouMode = view.findViewById(R.id.textYouMode);
+        buttonYouToggleMode = view.findViewById(R.id.buttonYouToggleMode);
+        buttonYouQueue = view.findViewById(R.id.buttonYouQueue);
+        Button buttonEditAvatar = view.findViewById(R.id.buttonEditAvatar);
+        Button buttonEditNickname = view.findViewById(R.id.buttonEditNickname);
+        LinearLayout buttonYouLanguage = view.findViewById(R.id.buttonYouLanguage);
+        LinearLayout buttonYouTheme = view.findViewById(R.id.buttonYouTheme);
+
+        buttonEditAvatar.setOnClickListener(v -> host().showAvatarPicker());
+        buttonEditNickname.setOnClickListener(v -> host().showNicknameDialog());
+        buttonYouLanguage.setOnClickListener(v -> host().showLanguageDialog());
+        buttonYouTheme.setOnClickListener(v -> host().showThemeDialog());
+        buttonYouToggleMode.setOnClickListener(v -> host().toggleViewerMode());
+        buttonYouQueue.setOnClickListener(v -> host().openModerationQueue());
+
+        refreshContent();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        refreshContent();
+    }
+
+    @Override
+    public void refreshContent() {
+        if (!isAdded() || getView() == null || textYouAvatar == null) {
+            return;
+        }
+
+        String nickname = UiPreferences.getProfileNickname(requireContext());
+        String uid = UiPreferences.getProfileUid(requireContext());
+
+        textYouNickname.setText(nickname);
+        textYouUid.setText(getString(R.string.you_uid_format, uid));
+        textYouAvatar.setText(getAvatarLetter(nickname));
+        textYouAvatar.setBackground(makeAvatarBackground(UiPreferences.getAvatarIndex(requireContext())));
+        textYouLanguageValue.setText("zh-CN".equals(UiPreferences.getLanguageTag(requireContext()))
+                ? getString(R.string.settings_language_zh)
+                : getString(R.string.settings_language_en));
+        textYouThemeValue.setText(UiPreferences.isDarkTheme(requireContext())
+                ? getString(R.string.settings_theme_dark)
+                : getString(R.string.settings_theme_light));
+        textYouMode.setText(AppData.getCurrentModeLabel(requireContext()));
+        buttonYouToggleMode.setText(getString(
+                AppData.isAdminMode() ? R.string.drawer_switch_member : R.string.drawer_switch_admin
+        ));
+        buttonYouQueue.setEnabled(AppData.isAdminMode());
+        buttonYouQueue.setAlpha(AppData.isAdminMode() ? 1.0f : 0.72f);
+    }
+
+    private MainActivity host() {
+        return (MainActivity) requireActivity();
+    }
+
+    private GradientDrawable makeAvatarBackground(int avatarIndex) {
+        GradientDrawable drawable = (GradientDrawable) ContextCompat.getDrawable(requireContext(), R.drawable.bg_avatar_circle).mutate();
+        drawable.setColor(UiPreferences.getGoogleColor(avatarIndex));
+        return drawable;
+    }
+
+    private String getAvatarLetter(String nickname) {
+        String trimmed = nickname == null ? "" : nickname.trim();
+        if (trimmed.isEmpty()) {
+            return "?";
+        }
+        return trimmed.substring(0, 1).toUpperCase(Locale.getDefault());
+    }
+}
