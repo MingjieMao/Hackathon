@@ -39,4 +39,5 @@
     <color name="nav_active">#FFFFFF</color>
     <color name="nav_inactive">#8E95A3</color>
     <color name="tab_press_ripple">#00000000</color>
+    <color name="launcher_brand">#4752C4</color>
 </resources>

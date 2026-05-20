@@ -39,6 +39,7 @@ dependencies {
     implementation(libs.appcompat)
     implementation(libs.material)
     implementation(libs.activity)
+    implementation("androidx.core:core-splashscreen:1.0.1")
     implementation(libs.constraintlayout)
     implementation(libs.recyclerview)
     implementation("androidx.drawerlayout:drawerlayout:1.2.0")
