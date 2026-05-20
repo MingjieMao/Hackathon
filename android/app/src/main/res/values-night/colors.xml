@@ -3,23 +3,25 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
 
-    <color name="page_background">#000000</color>
-    <color name="surface">#111111</color>
-    <color name="surface_alt">#1C1C1E</color>
-    <color name="surface_border">#2C2C2E</color>
+    <color name="page_background">#1B1D21</color>
+    <color name="surface">#23262B</color>
+    <color name="surface_alt">#2C3036</color>
+    <color name="surface_border">#393E46</color>
 
-    <color name="ink_primary">#FFFFFF</color>
-    <color name="ink_secondary">#A1A1AA</color>
-    <color name="ink_tertiary">#636366</color>
+    <color name="ink_primary">#F5F7FA</color>
+    <color name="ink_secondary">#B8BDC7</color>
+    <color name="ink_tertiary">#838994</color>
 
-    <color name="accent_strong">#2C2C2E</color>
-    <color name="accent_soft">#1C1C1E</color>
-    <color name="accent_on_soft">#FFFFFF</color>
+    <color name="accent_strong">#6B77FF</color>
+    <color name="accent_soft">#323B93</color>
+    <color name="accent_on_soft">#F1F3FF</color>
 
-    <color name="warning_soft">#1C1C1E</color>
-    <color name="warning_ink">#3A3A3C</color>
-    <color name="danger_soft">#3A1D1F</color>
-    <color name="danger_ink">#FF6B6B</color>
+    <color name="warning_soft">#282A2F</color>
+    <color name="warning_ink">#6B77FF</color>
+    <color name="danger_soft">#37242A</color>
+    <color name="danger_ink">#F07A84</color>
+    <color name="pill_fill">#323B93</color>
+    <color name="pill_stroke">#393E46</color>
 
     <color name="avatar_moss">#2C2C2E</color>
     <color name="avatar_coral">#3A3A3C</color>
@@ -27,11 +29,12 @@
     <color name="avatar_plum">#636366</color>
     <color name="avatar_sand">#8E8E93</color>
 
-    <color name="tab_bar_fill">#AA2C3035</color>
-    <color name="tab_bar_stroke">#4A5058</color>
-    <color name="tab_indicator_fill_top">#EEE3E9EE</color>
-    <color name="tab_indicator_fill_bottom">#EEC9D0D8</color>
-    <color name="tab_indicator_stroke">#EEF2F6</color>
+    <color name="tab_bar_fill">#2A2E36</color>
+    <color name="tab_bar_stroke">#2A2E36</color>
+    <color name="tab_indicator_fill_top">#26FFFFFF</color>
+    <color name="tab_indicator_fill_bottom">#26FFFFFF</color>
+    <color name="tab_indicator_stroke">#32FFFFFF</color>
     <color name="nav_active">#FFFFFF</color>
-    <color name="nav_inactive">#8E8E93</color>
+    <color name="nav_inactive">#8E95A3</color>
+    <color name="tab_press_ripple">#00000000</color>
 </resources>

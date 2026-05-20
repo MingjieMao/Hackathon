@@ -20,8 +20,10 @@ import dao.model.Post;
 
 public class ChannelsFragment extends Fragment implements RefreshablePage {
     private TextView textChannelsMode;
+    private TextView textChannelsTitle;
     private TextView textChannelsSubtitle;
-    private TextView textChannelsHighlightBody;
+    private TextView textFeedEmptyTitle;
+    private TextView textFeedEmptyBody;
     private RecyclerView recyclerPosts;
 
     @Nullable
@@ -35,8 +37,10 @@ public class ChannelsFragment extends Fragment implements RefreshablePage {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         textChannelsMode = view.findViewById(R.id.textChannelsMode);
+        textChannelsTitle = view.findViewById(R.id.textChannelsTitle);
         textChannelsSubtitle = view.findViewById(R.id.textChannelsSubtitle);
-        textChannelsHighlightBody = view.findViewById(R.id.textChannelsHighlightBody);
+        textFeedEmptyTitle = view.findViewById(R.id.textFeedEmptyTitle);
+        textFeedEmptyBody = view.findViewById(R.id.textFeedEmptyBody);
         recyclerPosts = view.findViewById(R.id.recyclerPosts);
         ImageButton buttonChannelsDrawer = view.findViewById(R.id.buttonChannelsDrawer);
         ImageButton buttonCreatePost = view.findViewById(R.id.buttonCreatePost);
@@ -60,16 +64,21 @@ public class ChannelsFragment extends Fragment implements RefreshablePage {
         }
 
         textChannelsMode.setText(AppData.getCurrentModeLabel(requireContext()));
+        textChannelsTitle.setText(AppData.getSelectedForumLabel(requireContext()));
         textChannelsSubtitle.setText(AppData.getMainSubtitle(requireContext()));
-        textChannelsHighlightBody.setText(AppData.isAdminMode()
-                ? getString(R.string.channels_highlight_admin)
-                : getString(R.string.channels_highlight_member));
 
         ArrayList<Post> posts = AppData.getPosts();
         PostAdapter adapter = new PostAdapter(posts);
         adapter.setOnClickListener(this::openPost);
-        adapter.setOnLikeClickListener(post -> AppData.togglePostLike(post));
+        adapter.setOnVoteClickListener((post, direction) -> AppData.togglePostVote(post, direction));
         recyclerPosts.setAdapter(adapter);
+
+        boolean empty = posts.isEmpty();
+        recyclerPosts.setVisibility(empty ? View.GONE : View.VISIBLE);
+        textFeedEmptyTitle.setVisibility(empty ? View.VISIBLE : View.GONE);
+        textFeedEmptyBody.setVisibility(empty ? View.VISIBLE : View.GONE);
+        textFeedEmptyTitle.setText(AppData.getFeedEmptyTitle(requireContext()));
+        textFeedEmptyBody.setText(AppData.getFeedEmptyBody(requireContext()));
     }
 
     private void openPost(Post post) {

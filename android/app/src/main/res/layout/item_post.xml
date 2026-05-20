@@ -3,84 +3,111 @@
     android:id="@+id/postRowRoot"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginBottom="12dp"
-    android:background="@drawable/bg_card"
     android:foreground="?attr/selectableItemBackground"
     android:orientation="vertical"
-    android:padding="16dp">
+    android:paddingTop="18dp"
+    android:paddingBottom="14dp">
+
+    <TextView
+        android:id="@+id/textPostMeta"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textAppearance="?attr/textAppearanceBodySmall"
+        android:textColor="@color/ink_secondary" />
 
     <TextView
         android:id="@+id/textPostTitle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textAppearance="?attr/textAppearanceTitleMedium"
+        android:layout_marginTop="10dp"
+        android:textAppearance="?attr/textAppearanceHeadlineSmall"
         android:textColor="@color/ink_primary"
         android:textStyle="bold" />
 
     <TextView
-        android:id="@+id/textPostAuthor"
+        android:id="@+id/textPostBody"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="6dp"
-        android:textAppearance="?attr/textAppearanceBodyMedium"
+        android:layout_marginTop="8dp"
+        android:lineSpacingExtra="4dp"
+        android:textAppearance="?attr/textAppearanceBodyLarge"
         android:textColor="@color/ink_secondary" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
+        android:layout_marginTop="16dp"
         android:gravity="center_vertical"
         android:orientation="horizontal">
 
         <LinearLayout
-            android:id="@+id/buttonPostLike"
+            android:id="@+id/layoutPostVotes"
             android:layout_width="wrap_content"
-            android:layout_height="36dp"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_pill"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingStart="12dp"
+            android:paddingTop="8dp"
+            android:paddingEnd="12dp"
+            android:paddingBottom="8dp">
+
+            <TextView
+                android:id="@+id/buttonPostUpvote"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:clickable="true"
+                android:focusable="true"
+                android:padding="4dp"
+                android:text="@string/action_upvote_symbol"
+                android:textAppearance="?attr/textAppearanceTitleSmall"
+                android:textColor="@color/ink_secondary"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/textPostScore"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginEnd="8dp"
+                android:textAppearance="?attr/textAppearanceBodyMedium"
+                android:textColor="@color/ink_primary"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/buttonPostDownvote"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:clickable="true"
+                android:focusable="true"
+                android:padding="4dp"
+                android:text="@string/action_downvote_symbol"
+                android:textAppearance="?attr/textAppearanceTitleSmall"
+                android:textColor="@color/ink_secondary"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/buttonPostComments"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:background="@drawable/bg_pill"
             android:clickable="true"
             android:focusable="true"
-            android:gravity="center"
-            android:orientation="horizontal"
-            android:minWidth="56dp"
-            android:paddingEnd="18dp">
-
-            <ImageView
-                android:id="@+id/iconPostLike"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:contentDescription="@string/action_like" />
-
-            <TextView
-                android:id="@+id/textPostLikeCount"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="4dp"
-                android:textAppearance="?attr/textAppearanceBodyMedium"
-                android:textColor="@color/ink_secondary" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/textPostCount"
-            android:layout_width="wrap_content"
-            android:layout_height="36dp"
-            android:gravity="center"
-            android:orientation="horizontal"
-            android:minWidth="56dp"
-            android:paddingEnd="18dp">
-
-            <ImageView
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:contentDescription="@string/reply_count_desc"
-                android:src="@drawable/ic_reply_count_24" />
-
-            <TextView
-                android:id="@+id/textPostReplyCount"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="4dp"
-                android:textAppearance="?attr/textAppearanceBodyMedium"
-                android:textColor="@color/ink_secondary" />
-        </LinearLayout>
+            android:paddingStart="14dp"
+            android:paddingTop="10dp"
+            android:paddingEnd="14dp"
+            android:paddingBottom="10dp"
+            android:textAppearance="?attr/textAppearanceBodyMedium"
+            android:textColor="@color/ink_primary"
+            android:textStyle="bold" />
     </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginTop="18dp"
+        android:background="@color/surface_border" />
 
 </LinearLayout>

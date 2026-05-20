@@ -3,11 +3,10 @@ package com.example.myapplication;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.List;
@@ -17,7 +16,7 @@ import dao.model.Post;
 public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
     private final List<Post> posts;
     private OnClickListener onClickListener;
-    private OnLikeClickListener onLikeClickListener;
+    private OnVoteClickListener onVoteClickListener;
 
     public PostAdapter(List<Post> posts) {
         this.posts = posts;
@@ -27,8 +26,8 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
         this.onClickListener = onClickListener;
     }
 
-    public void setOnLikeClickListener(OnLikeClickListener onLikeClickListener) {
-        this.onLikeClickListener = onLikeClickListener;
+    public void setOnVoteClickListener(OnVoteClickListener onVoteClickListener) {
+        this.onVoteClickListener = onVoteClickListener;
     }
 
     @NonNull
@@ -42,18 +41,10 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Post post = posts.get(position);
         holder.display(post);
-        holder.itemView.setOnClickListener(v -> {
-            if (onClickListener != null) {
-                onClickListener.onClick(post);
-            }
-        });
-        holder.buttonPostLike.setOnClickListener(v -> {
-            if (onLikeClickListener != null) {
-                onLikeClickListener.onLikeClick(post);
-                holder.display(post);
-                animateLike(holder.buttonPostLike);
-            }
-        });
+        holder.itemView.setOnClickListener(v -> openPost(post));
+        holder.buttonPostComments.setOnClickListener(v -> openPost(post));
+        holder.buttonPostUpvote.setOnClickListener(v -> vote(holder, post, 1));
+        holder.buttonPostDownvote.setOnClickListener(v -> vote(holder, post, -1));
     }
 
     @Override
@@ -65,17 +56,31 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
         void onClick(Post post);
     }
 
-    public interface OnLikeClickListener {
-        void onLikeClick(Post post);
+    public interface OnVoteClickListener {
+        void onVote(Post post, int direction);
     }
 
-    private void animateLike(View view) {
+    private void openPost(Post post) {
+        if (onClickListener != null) {
+            onClickListener.onClick(post);
+        }
+    }
+
+    private void vote(ViewHolder holder, Post post, int direction) {
+        if (onVoteClickListener != null) {
+            onVoteClickListener.onVote(post, direction);
+            holder.display(post);
+            animateVote(direction > 0 ? holder.buttonPostUpvote : holder.buttonPostDownvote);
+        }
+    }
+
+    private void animateVote(View view) {
         view.animate().cancel();
         view.setScaleX(1.0f);
         view.setScaleY(1.0f);
         view.animate()
-                .scaleX(1.22f)
-                .scaleY(1.22f)
+                .scaleX(1.16f)
+                .scaleY(1.16f)
                 .setDuration(110L)
                 .withEndAction(() -> view.animate()
                         .scaleX(1.0f)
@@ -86,31 +91,42 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
     }
 
     static class ViewHolder extends RecyclerView.ViewHolder {
+        private final TextView textPostMeta;
         private final TextView textPostTitle;
-        private final TextView textPostAuthor;
-        private final TextView textPostCount;
-        private final TextView textPostLikeCount;
-        private final ImageView iconPostLike;
-        private final LinearLayout buttonPostLike;
+        private final TextView textPostBody;
+        private final TextView textPostScore;
+        private final TextView buttonPostUpvote;
+        private final TextView buttonPostDownvote;
+        private final TextView buttonPostComments;
 
         ViewHolder(View view) {
             super(view);
+            textPostMeta = view.findViewById(R.id.textPostMeta);
             textPostTitle = view.findViewById(R.id.textPostTitle);
-            textPostAuthor = view.findViewById(R.id.textPostAuthor);
-            textPostCount = view.findViewById(R.id.textPostReplyCount);
-            textPostLikeCount = view.findViewById(R.id.textPostLikeCount);
-            iconPostLike = view.findViewById(R.id.iconPostLike);
-            buttonPostLike = view.findViewById(R.id.buttonPostLike);
+            textPostBody = view.findViewById(R.id.textPostBody);
+            textPostScore = view.findViewById(R.id.textPostScore);
+            buttonPostUpvote = view.findViewById(R.id.buttonPostUpvote);
+            buttonPostDownvote = view.findViewById(R.id.buttonPostDownvote);
+            buttonPostComments = view.findViewById(R.id.buttonPostComments);
         }
 
         void display(Post post) {
+            int upvoteColor = ContextCompat.getColor(itemView.getContext(), R.color.accent_strong);
+            int neutralColor = ContextCompat.getColor(itemView.getContext(), R.color.ink_secondary);
+            int downvoteColor = ContextCompat.getColor(itemView.getContext(), R.color.danger_ink);
+
+            textPostMeta.setText(AppData.getPostFeedMeta(itemView.getContext(), post));
             textPostTitle.setText(post.topic);
-            textPostAuthor.setText(AppData.getPostMeta(itemView.getContext(), post));
-            textPostCount.setText(AppData.getPostReplyCountLabel(itemView.getContext(), post));
-            textPostLikeCount.setText(AppData.getPostLikeCountLabel(itemView.getContext(), post));
-            iconPostLike.setImageResource(AppData.hasCurrentUserLikedPost(post)
-                    ? R.drawable.ic_like_filled_24
-                    : R.drawable.ic_like_outline_24);
+            textPostBody.setText(AppData.getPostBodyPreview(post));
+            textPostScore.setText(String.valueOf(AppData.getPostVoteScore(post)));
+            buttonPostComments.setText(AppData.getPostCommentChipLabel(itemView.getContext(), post));
+
+            int voteDirection = AppData.getCurrentUserPostVote(post);
+            buttonPostUpvote.setTextColor(voteDirection > 0 ? upvoteColor : neutralColor);
+            buttonPostDownvote.setTextColor(voteDirection < 0 ? downvoteColor : neutralColor);
+            textPostScore.setTextColor(voteDirection > 0
+                    ? upvoteColor
+                    : voteDirection < 0 ? downvoteColor : ContextCompat.getColor(itemView.getContext(), R.color.ink_primary));
         }
     }
 }

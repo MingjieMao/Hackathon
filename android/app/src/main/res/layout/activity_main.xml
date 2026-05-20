@@ -31,8 +31,8 @@
             android:background="@drawable/bg_tab_bar"
             android:clipChildren="false"
             android:clipToPadding="false"
-            android:elevation="10dp"
-            android:padding="6dp">
+            android:elevation="0dp"
+            android:padding="5dp">
 
             <View
                 android:id="@+id/navIndicator"
@@ -53,7 +53,7 @@
                     android:layout_weight="1"
                     android:clickable="true"
                     android:focusable="true"
-                    android:foreground="?attr/selectableItemBackgroundBorderless"
+                    android:foreground="@drawable/fg_tab_press"
                     android:gravity="center"
                     android:orientation="vertical">
 
@@ -80,7 +80,7 @@
                     android:layout_weight="1"
                     android:clickable="true"
                     android:focusable="true"
-                    android:foreground="?attr/selectableItemBackgroundBorderless"
+                    android:foreground="@drawable/fg_tab_press"
                     android:gravity="center"
                     android:orientation="vertical">
 
@@ -107,7 +107,7 @@
                     android:layout_weight="1"
                     android:clickable="true"
                     android:focusable="true"
-                    android:foreground="?attr/selectableItemBackgroundBorderless"
+                    android:foreground="@drawable/fg_tab_press"
                     android:gravity="center"
                     android:orientation="vertical">
 
@@ -133,18 +133,18 @@
 
     <LinearLayout
         android:id="@+id/drawerPanel"
-        android:layout_width="300dp"
+        android:layout_width="320dp"
         android:layout_height="match_parent"
         android:layout_gravity="start"
         android:background="@color/surface"
         android:orientation="vertical"
-        android:padding="20dp">
+        android:padding="22dp">
 
         <TextView
             android:id="@+id/textDrawerTitle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/drawer_workspace_title"
+            android:text="@string/drawer_communities_title"
             android:textAppearance="?attr/textAppearanceHeadlineSmall"
             android:textColor="@color/ink_primary"
             android:textStyle="bold" />
@@ -154,7 +154,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:text="@string/drawer_workspace_subtitle"
+            android:text="@string/drawer_communities_subtitle"
             android:textAppearance="?attr/textAppearanceBodyMedium"
             android:textColor="@color/ink_secondary" />
 
@@ -167,43 +167,49 @@
             android:padding="16dp">
 
             <Button
-                android:id="@+id/buttonDrawerMode"
+                android:id="@+id/buttonDrawerForumAnu"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:backgroundTint="@color/accent_soft"
-                android:textAllCaps="false"
-                android:textColor="@color/accent_on_soft" />
+                android:textAllCaps="false" />
 
             <Button
-                android:id="@+id/buttonDrawerQueue"
+                android:id="@+id/buttonDrawerForumUnsw"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
-                android:backgroundTint="@color/warning_ink"
-                android:text="@string/drawer_queue"
-                android:textAllCaps="false"
-                android:textColor="@color/white" />
+                android:textAllCaps="false" />
 
             <Button
-                android:id="@+id/buttonDrawerDrafts"
+                android:id="@+id/buttonDrawerForumUsyd"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
-                android:backgroundTint="@color/surface_alt"
-                android:text="@string/drawer_saved_drafts"
-                android:textAllCaps="false"
-                android:textColor="@color/ink_primary" />
+                android:textAllCaps="false" />
 
             <Button
-                android:id="@+id/buttonDrawerTeamSpace"
+                android:id="@+id/buttonDrawerForumUm"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
-                android:backgroundTint="@color/surface_alt"
-                android:text="@string/drawer_team_space"
-                android:textAllCaps="false"
-                android:textColor="@color/ink_primary" />
+                android:textAllCaps="false" />
         </LinearLayout>
+
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+
+        <Button
+            android:id="@+id/buttonDrawerSettings"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:backgroundTint="@color/accent_strong"
+            android:drawableStart="@drawable/ic_settings_24"
+            android:drawablePadding="10dp"
+            android:gravity="start|center_vertical"
+            android:text="@string/drawer_settings"
+            android:textAllCaps="false"
+            android:textColor="@color/white" />
 
     </LinearLayout>
 

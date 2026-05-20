@@ -22,6 +22,9 @@ public class YouFragment extends Fragment implements RefreshablePage {
     private TextView textYouUid;
     private TextView textYouLanguageValue;
     private TextView textYouThemeValue;
+    private TextView textYouMode;
+    private Button buttonYouToggleMode;
+    private Button buttonYouQueue;
 
     @Nullable
     @Override
@@ -38,6 +41,9 @@ public class YouFragment extends Fragment implements RefreshablePage {
         textYouUid = view.findViewById(R.id.textYouUid);
         textYouLanguageValue = view.findViewById(R.id.textYouLanguageValue);
         textYouThemeValue = view.findViewById(R.id.textYouThemeValue);
+        textYouMode = view.findViewById(R.id.textYouMode);
+        buttonYouToggleMode = view.findViewById(R.id.buttonYouToggleMode);
+        buttonYouQueue = view.findViewById(R.id.buttonYouQueue);
         Button buttonEditAvatar = view.findViewById(R.id.buttonEditAvatar);
         Button buttonEditNickname = view.findViewById(R.id.buttonEditNickname);
         LinearLayout buttonYouLanguage = view.findViewById(R.id.buttonYouLanguage);
@@ -47,6 +53,8 @@ public class YouFragment extends Fragment implements RefreshablePage {
         buttonEditNickname.setOnClickListener(v -> host().showNicknameDialog());
         buttonYouLanguage.setOnClickListener(v -> host().showLanguageDialog());
         buttonYouTheme.setOnClickListener(v -> host().showThemeDialog());
+        buttonYouToggleMode.setOnClickListener(v -> host().toggleViewerMode());
+        buttonYouQueue.setOnClickListener(v -> host().openModerationQueue());
 
         refreshContent();
     }
@@ -76,6 +84,12 @@ public class YouFragment extends Fragment implements RefreshablePage {
         textYouThemeValue.setText(UiPreferences.isDarkTheme(requireContext())
                 ? getString(R.string.settings_theme_dark)
                 : getString(R.string.settings_theme_light));
+        textYouMode.setText(AppData.getCurrentModeLabel(requireContext()));
+        buttonYouToggleMode.setText(getString(
+                AppData.isAdminMode() ? R.string.drawer_switch_member : R.string.drawer_switch_admin
+        ));
+        buttonYouQueue.setEnabled(AppData.isAdminMode());
+        buttonYouQueue.setAlpha(AppData.isAdminMode() ? 1.0f : 0.72f);
     }
 
     private MainActivity host() {

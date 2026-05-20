@@ -24,12 +24,35 @@
                 android:padding="12dp"
                 android:src="@drawable/ic_menu_24" />
 
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/textChannelsTitle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="?attr/textAppearanceHeadlineSmall"
+                    android:textColor="@color/ink_primary"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/textChannelsSubtitle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:textAppearance="?attr/textAppearanceBodyMedium"
+                    android:textColor="@color/ink_secondary" />
+            </LinearLayout>
+
             <TextView
                 android:id="@+id/textChannelsMode"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:background="@drawable/bg_pill"
+                android:background="@drawable/bg_mode_pill"
                 android:paddingStart="14dp"
                 android:paddingTop="8dp"
                 android:paddingEnd="14dp"
@@ -40,60 +63,33 @@
         </LinearLayout>
 
         <TextView
-            android:id="@+id/textChannelsTitle"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="18dp"
-            android:text="@string/channels_title"
-            android:textAppearance="?attr/textAppearanceHeadlineMedium"
-            android:textColor="@color/ink_primary"
-            android:textStyle="bold" />
-
-        <TextView
-            android:id="@+id/textChannelsSubtitle"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:textAppearance="?attr/textAppearanceBodyLarge"
-            android:textColor="@color/ink_secondary" />
-
-        <LinearLayout
-            android:id="@+id/cardChannelsHighlight"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="18dp"
-            android:background="@drawable/bg_card"
-            android:orientation="vertical"
-            android:padding="18dp">
-
-            <TextView
-                android:id="@+id/textChannelsHighlightTitle"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/channels_highlight_title"
-                android:textAppearance="?attr/textAppearanceTitleMedium"
-                android:textColor="@color/ink_primary"
-                android:textStyle="bold" />
-
-            <TextView
-                android:id="@+id/textChannelsHighlightBody"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:text="@string/channels_highlight_body"
-                android:textAppearance="?attr/textAppearanceBodyMedium"
-                android:textColor="@color/ink_secondary" />
-        </LinearLayout>
-
-        <TextView
             android:id="@+id/textFeedHeading"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
+            android:layout_marginTop="22dp"
             android:text="@string/main_feed_heading"
             android:textAppearance="?attr/textAppearanceTitleMedium"
             android:textColor="@color/ink_primary"
             android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/textFeedEmptyTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:textAppearance="?attr/textAppearanceTitleLarge"
+            android:textColor="@color/ink_primary"
+            android:textStyle="bold"
+            android:visibility="gone" />
+
+        <TextView
+            android:id="@+id/textFeedEmptyBody"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:textAppearance="?attr/textAppearanceBodyLarge"
+            android:textColor="@color/ink_secondary"
+            android:visibility="gone" />
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recyclerPosts"
@@ -114,7 +110,7 @@
         android:layout_marginBottom="12dp"
         android:background="@drawable/bg_fab"
         android:contentDescription="@string/action_new_post"
-        android:elevation="8dp"
+        android:elevation="0dp"
         android:padding="15dp"
         android:src="@drawable/ic_add_24" />
 

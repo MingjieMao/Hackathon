@@ -1,5 +1,6 @@
 package com.example.myapplication;
 
+import android.content.res.ColorStateList;
 import android.content.Intent;
 import android.graphics.Typeface;
 import android.os.Bundle;
@@ -49,8 +50,11 @@ public class MainActivity extends AppCompatActivity {
     private TextView labelChannels;
     private TextView labelNotifications;
     private TextView labelYou;
-    private Button buttonDrawerQueue;
-    private Button buttonDrawerMode;
+    private Button buttonDrawerForumAnu;
+    private Button buttonDrawerForumUnsw;
+    private Button buttonDrawerForumUsyd;
+    private Button buttonDrawerForumUm;
+    private Button buttonDrawerSettings;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -77,23 +81,20 @@ public class MainActivity extends AppCompatActivity {
         labelNotifications = findViewById(R.id.labelNotifications);
         labelYou = findViewById(R.id.labelYou);
 
-        buttonDrawerQueue = findViewById(R.id.buttonDrawerQueue);
-        buttonDrawerMode = findViewById(R.id.buttonDrawerMode);
-        Button buttonDrawerDrafts = findViewById(R.id.buttonDrawerDrafts);
-        Button buttonDrawerTeamSpace = findViewById(R.id.buttonDrawerTeamSpace);
+        buttonDrawerForumAnu = findViewById(R.id.buttonDrawerForumAnu);
+        buttonDrawerForumUnsw = findViewById(R.id.buttonDrawerForumUnsw);
+        buttonDrawerForumUsyd = findViewById(R.id.buttonDrawerForumUsyd);
+        buttonDrawerForumUm = findViewById(R.id.buttonDrawerForumUm);
+        buttonDrawerSettings = findViewById(R.id.buttonDrawerSettings);
 
         applyInsets(mainContent, true);
         applyInsets(drawerPanel, false);
 
-        buttonDrawerQueue.setOnClickListener(v -> openModerationQueue());
-        buttonDrawerMode.setOnClickListener(v -> {
-            toggleViewerMode();
-            drawerRoot.closeDrawer(GravityCompat.START);
-        });
-        buttonDrawerDrafts.setOnClickListener(v ->
-                Toast.makeText(this, getString(R.string.toast_feature_coming_soon), Toast.LENGTH_SHORT).show());
-        buttonDrawerTeamSpace.setOnClickListener(v ->
-                Toast.makeText(this, getString(R.string.toast_feature_coming_soon), Toast.LENGTH_SHORT).show());
+        buttonDrawerForumAnu.setOnClickListener(v -> switchForum(AppData.FORUM_ANU));
+        buttonDrawerForumUnsw.setOnClickListener(v -> switchForum(AppData.FORUM_UNSW));
+        buttonDrawerForumUsyd.setOnClickListener(v -> switchForum(AppData.FORUM_USYD));
+        buttonDrawerForumUm.setOnClickListener(v -> switchForum(AppData.FORUM_UM));
+        buttonDrawerSettings.setOnClickListener(v -> showSettingsDialog());
 
         configurePager();
         configureTabBar();
@@ -137,6 +138,14 @@ public class MainActivity extends AppCompatActivity {
     public void toggleViewerMode() {
         AppData.toggleViewerMode();
         refreshDrawerUi();
+        notifyPagesChanged();
+    }
+
+    public void switchForum(String forumKey) {
+        AppData.setSelectedForum(forumKey);
+        refreshDrawerUi();
+        drawerRoot.closeDrawer(GravityCompat.START);
+        setPage(MainPagerAdapter.PAGE_CHANNELS, false);
         notifyPagesChanged();
     }
 
@@ -330,11 +339,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void refreshDrawerUi() {
-        buttonDrawerMode.setText(getString(
-                AppData.isAdminMode() ? R.string.drawer_switch_member : R.string.drawer_switch_admin
-        ));
-        buttonDrawerQueue.setEnabled(AppData.isAdminMode());
-        buttonDrawerQueue.setAlpha(AppData.isAdminMode() ? 1.0f : 0.72f);
+        styleForumButton(buttonDrawerForumAnu, AppData.FORUM_ANU);
+        styleForumButton(buttonDrawerForumUnsw, AppData.FORUM_UNSW);
+        styleForumButton(buttonDrawerForumUsyd, AppData.FORUM_USYD);
+        styleForumButton(buttonDrawerForumUm, AppData.FORUM_UM);
     }
 
     private void notifyPagesChanged() {
@@ -412,6 +420,16 @@ public class MainActivity extends AppCompatActivity {
                 .start();
     }
 
+    private void styleForumButton(Button button, String forumKey) {
+        boolean selected = AppData.isSelectedForum(forumKey);
+        int backgroundColor = ContextCompat.getColor(this, selected ? R.color.accent_strong : R.color.surface_alt);
+        int textColor = ContextCompat.getColor(this, selected ? R.color.white : R.color.ink_primary);
+        button.setText(AppData.getForumLabel(this, forumKey));
+        button.setBackgroundTintList(ColorStateList.valueOf(backgroundColor));
+        button.setTextColor(textColor);
+        button.setAlpha(selected ? 1.0f : 0.92f);
+    }
+
     private void syncIndicatorTo(float pageOffset, boolean animate) {
         if (navShell.getWidth() == 0) {
             navShell.post(() -> syncIndicatorTo(pageOffset, animate));
@@ -420,8 +438,9 @@ public class MainActivity extends AppCompatActivity {
 
         int innerWidth = navShell.getWidth() - navShell.getPaddingLeft() - navShell.getPaddingRight();
         int slotWidth = innerWidth / 3;
-        int indicatorWidth = slotWidth - dp(10);
-        int centeredOffset = (slotWidth - indicatorWidth) / 2;
+        int indicatorInset = dp(1);
+        int indicatorWidth = slotWidth - (indicatorInset * 2);
+        int centeredOffset = indicatorInset;
 
         ViewGroup.LayoutParams layoutParams = navIndicator.getLayoutParams();
         if (layoutParams.width != indicatorWidth) {

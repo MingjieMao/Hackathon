@@ -4,18 +4,15 @@ package persistentdata;
 import dao.PostDAO;
 import dao.UserDAO;
 import dao.model.Message;
-import dao.model.Like;
 import dao.model.Post;
 import dao.model.Report;
 import dao.model.User;
-import engagement.LikeManager;
 import moderation.ModerationTools;
 import persistentdata.formatted.CSVFormat;
 import persistentdata.formatted.CSVFormattedFactory;
 import persistentdata.io.ComputerIOFactory;
 import persistentdata.io.IOFactory;
 import persistentdata.serialization.HiddenMessageSerializer;
-import persistentdata.serialization.LikeSerializer;
 import persistentdata.serialization.MessageSerializer;
 import persistentdata.serialization.PostSerializer;
 import persistentdata.serialization.ReportSerializer;
@@ -56,11 +53,6 @@ public class DataManager {
 	private final DataPipeline<UUID, String[]> hiddenPipeline = new DataPipeline<>(
 			IO, new CSVFormattedFactory(new CSVFormat(1)), new HiddenMessageSerializer(), "hidden");
 
-
-	private final DataPipeline<Like, String[]> likePipeline = new DataPipeline<>(
-			IO, new CSVFormattedFactory(new CSVFormat(4)), new LikeSerializer(), "likes");
-
-
 	private final UserDAO users = UserDAO.getInstance();
 	private final PostDAO posts = PostDAO.getInstance();
 
@@ -69,13 +61,11 @@ public class DataManager {
 		users.clear();
 		posts.clear();
 		ModerationTools.clearAll();
-		LikeManager.clearAll();
 		userPipeline.readTo(users::add);
 		postPipeline.readTo(posts::add);
 		messagePipeline.readTo((message) -> posts.get(new Post(message.thread())).messages.insert(message));
 		reportPipeline.readTo(ModerationTools::loadReport);
 		hiddenPipeline.readTo(ModerationTools::loadHidden);
-		likePipeline.readTo(LikeManager::loadLike);
 	}
 
 
@@ -85,7 +75,6 @@ public class DataManager {
 		messagePipeline.writeFrom(posts.getAllMessages());
 		reportPipeline.writeFrom(ModerationTools.getAllReports());
 		hiddenPipeline.writeFrom(ModerationTools.getAllHiddenIds());
-		likePipeline.writeFrom(LikeManager.getAllLikes());
 	}
 }
 
