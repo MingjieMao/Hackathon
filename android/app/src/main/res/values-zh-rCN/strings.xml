@@ -59,8 +59,8 @@
     <string name="action_downvote">踩</string>
     <string name="action_comments">评论</string>
     <string name="action_reply">回复</string>
-    <string name="action_upvote_symbol">^</string>
-    <string name="action_downvote_symbol">v</string>
+    <string name="action_upvote_symbol">△</string>
+    <string name="action_downvote_symbol">▽</string>
 
     <string name="dialog_edit_uid_title">编辑用户编号</string>
     <string name="dialog_edit_nickname_title">编辑昵称</string>
@@ -69,6 +69,8 @@
     <string name="dialog_avatar_title">选择头像风格</string>
     <string name="dialog_post_title_hint">帖子标题</string>
     <string name="dialog_post_body_hint">主贴正文，可不填</string>
+    <string name="dialog_reply_title">回复评论</string>
+    <string name="dialog_reply_body_hint">输入回复内容</string>
     <string name="compose_post_prompt">你想分享什么？</string>
     <string name="compose_reply_scope">将发到当前选中的论坛</string>
 
@@ -81,6 +83,7 @@
     <string name="toast_reply_reported">已举报该评论。</string>
     <string name="toast_report_removed">已撤销举报。</string>
     <string name="toast_post_created">帖子已发布。</string>
+    <string name="toast_reply_created">回复已发布。</string>
     <string name="toast_reply_coming_soon">回复输入框还只是演示占位。</string>
 
     <string name="notifications_title">通知</string>
@@ -99,6 +102,7 @@
     <string name="post_summary_member_hidden">%1$d 条可见评论 • %2$d 条已被管理员隐藏</string>
     <string name="post_summary_member_visible">%1$d 条可见评论</string>
     <string name="post_feed_meta_format">%1$s • %2$s • %3$s</string>
+    <string name="post_feed_meta_byline_format">• %1$s • %2$s</string>
     <string name="post_comments_chip">评论 %1$d</string>
 
     <string name="message_hidden_admin">对成员隐藏中</string>

@@ -59,8 +59,8 @@
     <string name="action_downvote">Downvote</string>
     <string name="action_comments">Comments</string>
     <string name="action_reply">Reply</string>
-    <string name="action_upvote_symbol">^</string>
-    <string name="action_downvote_symbol">v</string>
+    <string name="action_upvote_symbol">△</string>
+    <string name="action_downvote_symbol">▽</string>
 
     <string name="dialog_edit_uid_title">Edit UID</string>
     <string name="dialog_edit_nickname_title">Edit Nickname</string>
@@ -69,6 +69,8 @@
     <string name="dialog_avatar_title">Choose an Avatar Style</string>
     <string name="dialog_post_title_hint">Post title</string>
     <string name="dialog_post_body_hint">Post body, optional</string>
+    <string name="dialog_reply_title">Reply to comment</string>
+    <string name="dialog_reply_body_hint">Write a reply</string>
     <string name="compose_post_prompt">What do you want to share?</string>
     <string name="compose_reply_scope">Posting into the currently selected forum</string>
 
@@ -81,6 +83,7 @@
     <string name="toast_reply_reported">Reply reported.</string>
     <string name="toast_report_removed">Report removed.</string>
     <string name="toast_post_created">Post created.</string>
+    <string name="toast_reply_created">Reply posted.</string>
     <string name="toast_reply_coming_soon">Reply composition is still a demo placeholder.</string>
 
     <string name="notifications_title">Notifications</string>
@@ -99,6 +102,7 @@
     <string name="post_summary_member_hidden">%1$d visible comments • %2$d hidden by moderators</string>
     <string name="post_summary_member_visible">%1$d visible comments</string>
     <string name="post_feed_meta_format">%1$s • %2$s • %3$s</string>
+    <string name="post_feed_meta_byline_format">• %1$s • %2$s</string>
     <string name="post_comments_chip">Comments %1$d</string>
 
     <string name="message_hidden_admin">Hidden from member view</string>

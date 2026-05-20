@@ -8,12 +8,39 @@
     android:paddingTop="18dp"
     android:paddingBottom="14dp">
 
-    <TextView
-        android:id="@+id/textPostMeta"
+    <LinearLayout
+        android:id="@+id/layoutPostCommunity"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textAppearance="?attr/textAppearanceBodySmall"
-        android:textColor="@color/ink_secondary" />
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <ImageView
+            android:id="@+id/imagePostCommunityAvatar"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:background="@drawable/bg_community_avatar"
+            android:contentDescription="@string/drawer_communities_title"
+            android:padding="3dp"
+            android:scaleType="centerInside" />
+
+        <TextView
+            android:id="@+id/textPostCommunity"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:textAppearance="?attr/textAppearanceBodySmall"
+            android:textColor="@color/accent_strong"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/textPostMeta"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="6dp"
+            android:textAppearance="?attr/textAppearanceBodySmall"
+            android:textColor="@color/ink_secondary" />
+    </LinearLayout>
 
     <TextView
         android:id="@+id/textPostTitle"
@@ -52,39 +79,43 @@
             android:paddingEnd="12dp"
             android:paddingBottom="8dp">
 
-            <TextView
-                android:id="@+id/buttonPostUpvote"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:clickable="true"
-                android:focusable="true"
-                android:padding="4dp"
-                android:text="@string/action_upvote_symbol"
-                android:textAppearance="?attr/textAppearanceTitleSmall"
-                android:textColor="@color/ink_secondary"
-                android:textStyle="bold" />
+                <ImageButton
+                    android:id="@+id/buttonPostUpvote"
+                    android:layout_width="34dp"
+                    android:layout_height="34dp"
+                    android:background="@android:color/transparent"
+                    android:clickable="true"
+                    android:contentDescription="@string/action_upvote"
+                    android:focusable="true"
+                    android:padding="5dp"
+                    android:src="@drawable/ic_vote_up_outline_24" />
 
             <TextView
                 android:id="@+id/textPostScore"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
-                android:layout_marginEnd="8dp"
+                android:layout_marginEnd="12dp"
                 android:textAppearance="?attr/textAppearanceBodyMedium"
                 android:textColor="@color/ink_primary"
                 android:textStyle="bold" />
 
-            <TextView
-                android:id="@+id/buttonPostDownvote"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:clickable="true"
-                android:focusable="true"
-                android:padding="4dp"
-                android:text="@string/action_downvote_symbol"
-                android:textAppearance="?attr/textAppearanceTitleSmall"
-                android:textColor="@color/ink_secondary"
-                android:textStyle="bold" />
+            <View
+                android:layout_width="1dp"
+                android:layout_height="26dp"
+                android:layout_marginEnd="8dp"
+                android:background="@color/surface_border" />
+
+                <ImageButton
+                    android:id="@+id/buttonPostDownvote"
+                    android:layout_width="34dp"
+                    android:layout_height="34dp"
+                    android:background="@android:color/transparent"
+                    android:clickable="true"
+                    android:contentDescription="@string/action_downvote"
+                    android:focusable="true"
+                    android:padding="5dp"
+                    android:src="@drawable/ic_vote_down_outline_24" />
         </LinearLayout>
 
         <TextView
@@ -94,6 +125,8 @@
             android:layout_marginStart="12dp"
             android:background="@drawable/bg_pill"
             android:clickable="true"
+            android:drawableStart="@drawable/ic_comment_outline_24"
+            android:drawablePadding="8dp"
             android:focusable="true"
             android:paddingStart="14dp"
             android:paddingTop="10dp"

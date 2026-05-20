@@ -21,6 +21,8 @@
     <color name="danger_soft">#3C252B</color>
     <color name="danger_ink">#ED636D</color>
     <color name="like_red">#ED636D</color>
+    <color name="vote_up">#FF4500</color>
+    <color name="vote_down">#2F6FED</color>
     <color name="pill_fill">#F1F3F7</color>
     <color name="pill_stroke">#E0E5EE</color>
 

@@ -6,6 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -24,6 +25,7 @@ public class ChannelsFragment extends Fragment implements RefreshablePage {
     private TextView textChannelsSubtitle;
     private TextView textFeedEmptyTitle;
     private TextView textFeedEmptyBody;
+    private ImageView imageChannelsForumAvatar;
     private RecyclerView recyclerPosts;
 
     @Nullable
@@ -41,6 +43,7 @@ public class ChannelsFragment extends Fragment implements RefreshablePage {
         textChannelsSubtitle = view.findViewById(R.id.textChannelsSubtitle);
         textFeedEmptyTitle = view.findViewById(R.id.textFeedEmptyTitle);
         textFeedEmptyBody = view.findViewById(R.id.textFeedEmptyBody);
+        imageChannelsForumAvatar = view.findViewById(R.id.imageChannelsForumAvatar);
         recyclerPosts = view.findViewById(R.id.recyclerPosts);
         ImageButton buttonChannelsDrawer = view.findViewById(R.id.buttonChannelsDrawer);
         ImageButton buttonCreatePost = view.findViewById(R.id.buttonCreatePost);
@@ -65,7 +68,8 @@ public class ChannelsFragment extends Fragment implements RefreshablePage {
 
         textChannelsMode.setText(AppData.getCurrentModeLabel(requireContext()));
         textChannelsTitle.setText(AppData.getSelectedForumLabel(requireContext()));
-        textChannelsSubtitle.setText(AppData.getMainSubtitle(requireContext()));
+        imageChannelsForumAvatar.setImageResource(AppData.getSelectedForumAvatarResId());
+        textChannelsSubtitle.setVisibility(View.GONE);
 
         ArrayList<Post> posts = AppData.getPosts();
         PostAdapter adapter = new PostAdapter(posts);

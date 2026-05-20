@@ -20,6 +20,8 @@
     <color name="warning_ink">#6B77FF</color>
     <color name="danger_soft">#37242A</color>
     <color name="danger_ink">#F07A84</color>
+    <color name="vote_up">#FF6A3D</color>
+    <color name="vote_down">#7DA2FF</color>
     <color name="pill_fill">#323B93</color>
     <color name="pill_stroke">#393E46</color>
 

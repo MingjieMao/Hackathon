@@ -118,6 +118,10 @@ public final class AppData {
         return getForumLabel(context, selectedForumKey);
     }
 
+    public static int getSelectedForumAvatarResId() {
+        return getForumAvatarResId(selectedForumKey);
+    }
+
     public static String getForumLabel(Context context, String forumKey) {
         if (FORUM_UNSW.equals(forumKey)) {
             return context.getString(R.string.forum_unsw_label);
@@ -300,8 +304,33 @@ public final class AppData {
         );
     }
 
+    public static String getPostFeedByline(Context context, Post post) {
+        return context.getString(
+                R.string.post_feed_meta_byline_format,
+                getUsername(post.poster),
+                getPostTimestampLabel(post)
+        );
+    }
+
     public static String getPostCommunityLabel(Context context, Post post) {
         return getForumLabel(context, getForumKey(post));
+    }
+
+    public static int getPostCommunityAvatarResId(Post post) {
+        return getForumAvatarResId(getForumKey(post));
+    }
+
+    public static int getForumAvatarResId(String forumKey) {
+        if (FORUM_UNSW.equals(forumKey)) {
+            return R.drawable.avatar_unsw;
+        }
+        if (FORUM_USYD.equals(forumKey)) {
+            return R.drawable.avatar_usyd;
+        }
+        if (FORUM_UM.equals(forumKey)) {
+            return R.drawable.avatar_um;
+        }
+        return R.drawable.avatar_anu;
     }
 
     public static String getPostBody(Post post) {
@@ -350,6 +379,30 @@ public final class AppData {
             parentId = meta == null ? null : meta.parentId;
         }
         return depth;
+    }
+
+    public static int getMessageReplyCount(Message parent) {
+        ensurePopulated();
+        if (parent == null) {
+            return 0;
+        }
+
+        Post post = getPostForMessage(parent);
+        if (post == null) {
+            return 0;
+        }
+
+        int count = 0;
+        ArrayList<Message> visibleMessages = collectMessages(adminMode
+                ? post.messages.getAll()
+                : post.getVisibleMessages(false).getAll());
+        for (Message message : visibleMessages) {
+            UUID parentId = getParentId(message);
+            if (parent.id().equals(parentId)) {
+                count++;
+            }
+        }
+        return count;
     }
 
     public static int getReportCount(Message message) {
@@ -403,6 +456,17 @@ public final class AppData {
                 now,
                 1
         );
+    }
+
+    public static Message createReply(Message parent, String content) {
+        ensurePopulated();
+        User poster = getCurrentUser();
+        Post post = getPostForMessage(parent);
+        if (poster == null || post == null || parent == null || content == null || content.trim().isEmpty()) {
+            return null;
+        }
+
+        return addComment(post, poster, parent, System.currentTimeMillis(), content.trim(), 0);
     }
 
     public static boolean togglePostVote(Post post, int direction) {

@@ -1,10 +1,12 @@
 package com.example.myapplication;
 
 import android.os.Bundle;
+import android.text.InputType;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.PopupMenu;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -22,6 +24,8 @@ import java.util.ArrayList;
 import dao.model.Message;
 import dao.model.Post;
 
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+
 public class PostViewerActivity extends AppCompatActivity {
     public static final String EXTRA_POST_ID = "post_id";
 
@@ -34,8 +38,9 @@ public class PostViewerActivity extends AppCompatActivity {
     private TextView textPostViewerScore;
     private TextView textPostViewerComments;
     private TextView textCommentsEmpty;
-    private TextView buttonPostUpvote;
-    private TextView buttonPostDownvote;
+    private ImageView imagePostViewerCommunityAvatar;
+    private ImageButton buttonPostUpvote;
+    private ImageButton buttonPostDownvote;
     private Button buttonBack;
     private ImageButton buttonPostMenu;
     private RecyclerView recyclerMessages;
@@ -68,6 +73,7 @@ public class PostViewerActivity extends AppCompatActivity {
         textPostViewerScore = findViewById(R.id.textPostViewerScore);
         textPostViewerComments = findViewById(R.id.textPostViewerComments);
         textCommentsEmpty = findViewById(R.id.textCommentsEmpty);
+        imagePostViewerCommunityAvatar = findViewById(R.id.imagePostViewerCommunityAvatar);
         buttonPostUpvote = findViewById(R.id.buttonPostUpvote);
         buttonPostDownvote = findViewById(R.id.buttonPostDownvote);
         buttonBack = findViewById(R.id.buttonBack);
@@ -75,22 +81,25 @@ public class PostViewerActivity extends AppCompatActivity {
         recyclerMessages = findViewById(R.id.recyclerMessages);
 
         recyclerMessages.setLayoutManager(new LinearLayoutManager(this));
+        recyclerMessages.setNestedScrollingEnabled(false);
         post = AppData.getPostById(getIntent().getStringExtra(EXTRA_POST_ID));
 
         buttonBack.setOnClickListener(v -> finish());
         buttonPostUpvote.setOnClickListener(v -> {
             if (AppData.togglePostVote(post, 1)) {
                 refreshUi();
+                animateVote(buttonPostUpvote);
             }
         });
         buttonPostDownvote.setOnClickListener(v -> {
             if (AppData.togglePostVote(post, -1)) {
                 refreshUi();
+                animateVote(buttonPostDownvote);
             }
         });
         buttonPostMenu.setOnClickListener(v -> {
             if (rootMessage != null) {
-                showPostMenu(v, rootMessage);
+                handleMessageAction(rootMessage);
             }
         });
     }
@@ -117,6 +126,7 @@ public class PostViewerActivity extends AppCompatActivity {
         rootMessage = AppData.getRootMessage(post);
         textPostViewerMode.setText(AppData.getCurrentModeLabel(this));
         textPostViewerForum.setText(AppData.getPostCommunityLabel(this, post));
+        imagePostViewerCommunityAvatar.setImageResource(AppData.getPostCommunityAvatarResId(post));
         textPostViewerMeta.setText(getString(
                 R.string.message_author_line,
                 AppData.getUsername(post.poster),
@@ -124,7 +134,7 @@ public class PostViewerActivity extends AppCompatActivity {
         ));
         textPostViewerTitle.setText(post.topic);
         textPostViewerBody.setText(AppData.getPostBody(post));
-        textPostViewerComments.setText(AppData.getPostCommentChipLabel(this, post));
+        textPostViewerComments.setText(AppData.getPostReplyCountLabel(this, post));
         textPostViewerScore.setText(String.valueOf(AppData.getPostVoteScore(post)));
         updatePostVoteColors();
 
@@ -141,33 +151,76 @@ public class PostViewerActivity extends AppCompatActivity {
             AppData.toggleMessageVote(message, direction);
             refreshUi();
         });
-        adapter.setOnMessageReplyListener(message ->
-                Toast.makeText(this, getString(R.string.toast_reply_coming_soon), Toast.LENGTH_SHORT).show());
+        adapter.setOnMessageReplyListener(this::showReplyDialog);
         recyclerMessages.setAdapter(adapter);
     }
 
+    private void showReplyDialog(Message parent) {
+        EditText input = new EditText(this);
+        input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_MULTI_LINE | InputType.TYPE_TEXT_FLAG_CAP_SENTENCES);
+        input.setMinLines(3);
+        input.setHint(R.string.dialog_reply_body_hint);
+        int horizontal = Math.round(16 * getResources().getDisplayMetrics().density);
+        int vertical = Math.round(12 * getResources().getDisplayMetrics().density);
+        input.setPadding(horizontal, vertical, horizontal, vertical);
+
+        androidx.appcompat.app.AlertDialog dialog = new MaterialAlertDialogBuilder(this)
+                .setTitle(R.string.dialog_reply_title)
+                .setView(input)
+                .setNegativeButton(R.string.action_cancel, null)
+                .setPositiveButton(R.string.action_reply, null)
+                .create();
+
+        dialog.setOnShowListener(unused -> dialog.getButton(androidx.appcompat.app.AlertDialog.BUTTON_POSITIVE)
+                .setOnClickListener(v -> {
+                    Message reply = AppData.createReply(parent, input.getText().toString());
+                    if (reply == null) {
+                        input.setError(getString(R.string.dialog_reply_body_hint));
+                        return;
+                    }
+                    dialog.dismiss();
+                    Toast.makeText(this, getString(R.string.toast_reply_created), Toast.LENGTH_SHORT).show();
+                    refreshUi();
+                }));
+        dialog.show();
+    }
+
     private void updatePostVoteColors() {
-        int upvoteColor = ContextCompat.getColor(this, R.color.accent_strong);
+        int upvoteColor = ContextCompat.getColor(this, R.color.vote_up);
         int neutralColor = ContextCompat.getColor(this, R.color.ink_secondary);
-        int downvoteColor = ContextCompat.getColor(this, R.color.danger_ink);
+        int downvoteColor = ContextCompat.getColor(this, R.color.vote_down);
         int primaryColor = ContextCompat.getColor(this, R.color.ink_primary);
+        int reportColor = ContextCompat.getColor(this, R.color.danger_ink);
 
         int voteDirection = AppData.getCurrentUserPostVote(post);
-        buttonPostUpvote.setTextColor(voteDirection > 0 ? upvoteColor : neutralColor);
-        buttonPostDownvote.setTextColor(voteDirection < 0 ? downvoteColor : neutralColor);
+        buttonPostUpvote.setImageResource(voteDirection > 0
+                ? R.drawable.ic_vote_up_filled_24
+                : R.drawable.ic_vote_up_outline_24);
+        buttonPostDownvote.setImageResource(voteDirection < 0
+                ? R.drawable.ic_vote_down_filled_24
+                : R.drawable.ic_vote_down_outline_24);
+        boolean reported = AppData.hasCurrentUserReported(rootMessage);
+        buttonPostMenu.setImageResource(reported ? R.drawable.ic_flag_24 : R.drawable.ic_flag_outline_24);
+        buttonPostMenu.setColorFilter(reported ? reportColor : neutralColor);
         textPostViewerScore.setTextColor(voteDirection > 0
                 ? upvoteColor
                 : voteDirection < 0 ? downvoteColor : primaryColor);
     }
 
-    private void showPostMenu(View anchor, Message message) {
-        PopupMenu menu = new PopupMenu(anchor.getContext(), anchor);
-        menu.getMenu().add(AppData.getMessageActionLabel(anchor.getContext(), message));
-        menu.setOnMenuItemClickListener(item -> {
-            handleMessageAction(message);
-            return true;
-        });
-        menu.show();
+    private void animateVote(View view) {
+        view.animate().cancel();
+        view.setScaleX(1.0f);
+        view.setScaleY(1.0f);
+        view.animate()
+                .scaleX(1.16f)
+                .scaleY(1.16f)
+                .setDuration(110L)
+                .withEndAction(() -> view.animate()
+                        .scaleX(1.0f)
+                        .scaleY(1.0f)
+                        .setDuration(160L)
+                        .start())
+                .start();
     }
 
     private void handleMessageAction(Message message) {

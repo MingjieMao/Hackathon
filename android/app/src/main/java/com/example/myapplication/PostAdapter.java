@@ -3,6 +3,8 @@ package com.example.myapplication;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -92,16 +94,20 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
 
     static class ViewHolder extends RecyclerView.ViewHolder {
         private final TextView textPostMeta;
+        private final TextView textPostCommunity;
+        private final ImageView imagePostCommunityAvatar;
         private final TextView textPostTitle;
         private final TextView textPostBody;
         private final TextView textPostScore;
-        private final TextView buttonPostUpvote;
-        private final TextView buttonPostDownvote;
+        private final ImageButton buttonPostUpvote;
+        private final ImageButton buttonPostDownvote;
         private final TextView buttonPostComments;
 
         ViewHolder(View view) {
             super(view);
             textPostMeta = view.findViewById(R.id.textPostMeta);
+            textPostCommunity = view.findViewById(R.id.textPostCommunity);
+            imagePostCommunityAvatar = view.findViewById(R.id.imagePostCommunityAvatar);
             textPostTitle = view.findViewById(R.id.textPostTitle);
             textPostBody = view.findViewById(R.id.textPostBody);
             textPostScore = view.findViewById(R.id.textPostScore);
@@ -111,19 +117,25 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
         }
 
         void display(Post post) {
-            int upvoteColor = ContextCompat.getColor(itemView.getContext(), R.color.accent_strong);
+            int upvoteColor = ContextCompat.getColor(itemView.getContext(), R.color.vote_up);
             int neutralColor = ContextCompat.getColor(itemView.getContext(), R.color.ink_secondary);
-            int downvoteColor = ContextCompat.getColor(itemView.getContext(), R.color.danger_ink);
+            int downvoteColor = ContextCompat.getColor(itemView.getContext(), R.color.vote_down);
 
-            textPostMeta.setText(AppData.getPostFeedMeta(itemView.getContext(), post));
+            textPostCommunity.setText(AppData.getPostCommunityLabel(itemView.getContext(), post));
+            textPostMeta.setText(AppData.getPostFeedByline(itemView.getContext(), post));
+            imagePostCommunityAvatar.setImageResource(AppData.getPostCommunityAvatarResId(post));
             textPostTitle.setText(post.topic);
             textPostBody.setText(AppData.getPostBodyPreview(post));
             textPostScore.setText(String.valueOf(AppData.getPostVoteScore(post)));
-            buttonPostComments.setText(AppData.getPostCommentChipLabel(itemView.getContext(), post));
+            buttonPostComments.setText(AppData.getPostReplyCountLabel(itemView.getContext(), post));
 
             int voteDirection = AppData.getCurrentUserPostVote(post);
-            buttonPostUpvote.setTextColor(voteDirection > 0 ? upvoteColor : neutralColor);
-            buttonPostDownvote.setTextColor(voteDirection < 0 ? downvoteColor : neutralColor);
+            buttonPostUpvote.setImageResource(voteDirection > 0
+                    ? R.drawable.ic_vote_up_filled_24
+                    : R.drawable.ic_vote_up_outline_24);
+            buttonPostDownvote.setImageResource(voteDirection < 0
+                    ? R.drawable.ic_vote_down_filled_24
+                    : R.drawable.ic_vote_down_outline_24);
             textPostScore.setTextColor(voteDirection > 0
                     ? upvoteColor
                     : voteDirection < 0 ? downvoteColor : ContextCompat.getColor(itemView.getContext(), R.color.ink_primary));

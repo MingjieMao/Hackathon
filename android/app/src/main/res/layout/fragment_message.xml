@@ -8,6 +8,13 @@
     android:paddingBottom="14dp">
 
     <LinearLayout
+        android:id="@+id/layoutMessageDepthRails"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:orientation="horizontal"
+        android:visibility="gone" />
+
+    <LinearLayout
         android:id="@+id/layoutMessageAvatarColumn"
         android:layout_width="40dp"
         android:layout_height="match_parent"
@@ -71,12 +78,12 @@
 
             <ImageButton
                 android:id="@+id/buttonMessageMenu"
-                android:layout_width="36dp"
-                android:layout_height="36dp"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
                 android:background="@android:color/transparent"
                 android:contentDescription="@string/action_report"
-                android:padding="6dp"
-                android:src="@drawable/ic_more_horiz_24" />
+                android:padding="5dp"
+                android:src="@drawable/ic_flag_outline_24" />
         </LinearLayout>
 
         <TextView
@@ -106,66 +113,84 @@
 
             <LinearLayout
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_height="40dp"
                 android:background="@drawable/bg_pill"
                 android:gravity="center_vertical"
                 android:orientation="horizontal"
                 android:paddingStart="10dp"
-                android:paddingTop="7dp"
                 android:paddingEnd="10dp"
-                android:paddingBottom="7dp">
+                android:paddingTop="0dp"
+                android:paddingBottom="0dp">
 
-                <TextView
+                <ImageButton
                     android:id="@+id/buttonMessageUpvote"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:background="@android:color/transparent"
                     android:clickable="true"
+                    android:contentDescription="@string/action_upvote"
                     android:focusable="true"
                     android:padding="4dp"
-                    android:text="@string/action_upvote_symbol"
-                    android:textAppearance="?attr/textAppearanceBodyMedium"
-                    android:textColor="@color/ink_secondary"
-                    android:textStyle="bold" />
+                    android:src="@drawable/ic_vote_up_outline_24" />
 
                 <TextView
                     android:id="@+id/textMessageScore"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="8dp"
-                    android:layout_marginEnd="8dp"
+                    android:layout_marginEnd="12dp"
                     android:textAppearance="?attr/textAppearanceBodyMedium"
                     android:textColor="@color/ink_primary"
                     android:textStyle="bold" />
 
-                <TextView
+                <View
+                    android:layout_width="1dp"
+                    android:layout_height="24dp"
+                    android:layout_marginEnd="8dp"
+                    android:background="@color/surface_border" />
+
+                <ImageButton
                     android:id="@+id/buttonMessageDownvote"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:background="@android:color/transparent"
                     android:clickable="true"
+                    android:contentDescription="@string/action_downvote"
                     android:focusable="true"
                     android:padding="4dp"
-                    android:text="@string/action_downvote_symbol"
-                    android:textAppearance="?attr/textAppearanceBodyMedium"
-                    android:textColor="@color/ink_secondary"
-                    android:textStyle="bold" />
+                    android:src="@drawable/ic_vote_down_outline_24" />
             </LinearLayout>
 
-            <TextView
+            <LinearLayout
                 android:id="@+id/buttonMessageReply"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_height="40dp"
                 android:layout_marginStart="10dp"
                 android:background="@drawable/bg_pill"
                 android:clickable="true"
+                android:contentDescription="@string/action_reply"
                 android:focusable="true"
-                android:paddingStart="14dp"
-                android:paddingTop="8dp"
-                android:paddingEnd="14dp"
-                android:paddingBottom="8dp"
-                android:text="@string/action_reply"
-                android:textAppearance="?attr/textAppearanceBodyMedium"
-                android:textColor="@color/ink_primary"
-                android:textStyle="bold" />
+                android:gravity="center_vertical"
+                android:minWidth="58dp"
+                android:orientation="horizontal"
+                android:paddingStart="9dp"
+                android:paddingEnd="12dp">
+
+                <ImageView
+                    android:id="@+id/imageMessageReplyIcon"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/ic_comment_outline_24" />
+
+                <TextView
+                    android:id="@+id/textMessageReplyCount"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:textAppearance="?attr/textAppearanceBodyMedium"
+                    android:textColor="@color/ink_primary"
+                    android:textStyle="bold" />
+            </LinearLayout>
         </LinearLayout>
     </LinearLayout>
 
