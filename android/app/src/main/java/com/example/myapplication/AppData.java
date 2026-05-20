@@ -684,6 +684,7 @@ public final class AppData {
                 now - minutes(96),
                 42
         );
+        POST_IMAGE_URIS.put(layoutPost.id, drawableImageUri(R.drawable.avatar_anu));
         Message layoutTopReply = addComment(
                 layoutPost,
                 studyBuddy,
@@ -694,6 +695,7 @@ public final class AppData {
                         : "I agree, especially if the drawer only handles community switching. That would make the home screen much cleaner.",
                 14
         );
+        MESSAGE_IMAGE_URIS.put(layoutTopReply.id(), drawableImageUri(R.drawable.avatar_unsw));
         addComment(
                 layoutPost,
                 uxPilot,
@@ -816,6 +818,7 @@ public final class AppData {
                         : "Then the second level should still keep vote, reply, and report entry points so the interaction does not disappear with indentation.",
                 8
         );
+        MESSAGE_IMAGE_URIS.put(nestedSecondLevel.id(), drawableImageUri(R.drawable.avatar_usyd));
         addComment(
                 nestedPost,
                 adminViewer,
@@ -847,6 +850,7 @@ public final class AppData {
                 now - minutes(58),
                 17
         );
+        POST_IMAGE_URIS.put(unswPost.id, drawableImageUri(R.drawable.avatar_unsw));
         addComment(
                 unswPost,
                 uxPilot,
@@ -867,6 +871,7 @@ public final class AppData {
                         : "I will take the first-floor slot here and use this thread as another nesting example.",
                 4
         );
+        MESSAGE_IMAGE_URIS.put(unswNested.id(), drawableImageUri(R.drawable.avatar_anu));
         Message unswSecondFloor = addComment(
                 unswPost,
                 adminViewer,
@@ -909,6 +914,7 @@ public final class AppData {
                 now - minutes(53),
                 13
         );
+        POST_IMAGE_URIS.put(usydPost.id, drawableImageUri(R.drawable.avatar_usyd));
         addComment(
                 usydPost,
                 memberViewer,
@@ -929,6 +935,7 @@ public final class AppData {
                         : "I also want one cleaner nested thread in this forum.",
                 3
         );
+        MESSAGE_IMAGE_URIS.put(usydNested.id(), drawableImageUri(R.drawable.avatar_um));
         Message usydSecondFloor = addComment(
                 usydPost,
                 studyBuddy,
@@ -981,6 +988,7 @@ public final class AppData {
                         : "I like that direction. It makes the app feel more like a community people would actually keep using.",
                 5
         );
+        MESSAGE_IMAGE_URIS.put(umReply.id(), drawableImageUri(R.drawable.avatar_um));
         Message umSecondFloor = addComment(
                 umPost,
                 memberViewer,
@@ -1012,6 +1020,10 @@ public final class AppData {
                 now - minutes(34),
                 11
         );
+    }
+
+    private static String drawableImageUri(int drawableResId) {
+        return "android.resource://com.example.myapplication/" + drawableResId;
     }
 
     private static void seedModerationState() {
