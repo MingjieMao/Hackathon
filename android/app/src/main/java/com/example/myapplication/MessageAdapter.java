@@ -50,7 +50,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Message message = messages.get(position);
-        holder.display(message);
+        holder.display(message, shouldShowTopSeparator(message, position));
         holder.buttonMessageUpvote.setOnClickListener(v -> vote(holder, message, 1));
         holder.buttonMessageDownvote.setOnClickListener(v -> vote(holder, message, -1));
         holder.buttonMessageReply.setOnClickListener(v -> {
@@ -70,6 +70,10 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
         return messages.size();
     }
 
+    private boolean shouldShowTopSeparator(Message message, int position) {
+        return position > 0 && AppData.getCommentDepth(message) == 0;
+    }
+
     public interface OnMessageActionListener {
         void onPrimaryAction(Message message);
     }
@@ -85,7 +89,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
     private void vote(ViewHolder holder, Message message, int direction) {
         if (onMessageVoteListener != null) {
             onMessageVoteListener.onVote(message, direction);
-            holder.display(message);
+            holder.display(message, holder.viewMessageTopSeparator.getVisibility() == View.VISIBLE);
             animateVote(direction > 0 ? holder.buttonMessageUpvote : holder.buttonMessageDownvote);
         }
     }
@@ -108,6 +112,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
 
     static class ViewHolder extends RecyclerView.ViewHolder {
         private final View messageRoot;
+        private final View viewMessageTopSeparator;
         private final LinearLayout layoutMessageDepthRails;
         private final TextView textMessageAvatar;
         private final View viewMessageThreadLine;
@@ -126,6 +131,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
         ViewHolder(View view) {
             super(view);
             messageRoot = view.findViewById(R.id.messageRoot);
+            viewMessageTopSeparator = view.findViewById(R.id.viewMessageTopSeparator);
             layoutMessageDepthRails = view.findViewById(R.id.layoutMessageDepthRails);
             textMessageAvatar = view.findViewById(R.id.textMessageAvatar);
             viewMessageThreadLine = view.findViewById(R.id.viewMessageThreadLine);
@@ -142,7 +148,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
             buttonMessageMenu = view.findViewById(R.id.buttonMessageMenu);
         }
 
-        void display(Message message) {
+        void display(Message message, boolean showTopSeparator) {
             int upvoteColor = ContextCompat.getColor(itemView.getContext(), R.color.vote_up);
             int neutralColor = ContextCompat.getColor(itemView.getContext(), R.color.ink_secondary);
             int downvoteColor = ContextCompat.getColor(itemView.getContext(), R.color.vote_down);
@@ -150,6 +156,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
             int reportColor = ContextCompat.getColor(itemView.getContext(), R.color.danger_ink);
 
             int depth = AppData.getCommentDepth(message);
+            viewMessageTopSeparator.setVisibility(showTopSeparator ? View.VISIBLE : View.GONE);
             messageRoot.setPaddingRelative(0, messageRoot.getPaddingTop(), messageRoot.getPaddingEnd(), messageRoot.getPaddingBottom());
             bindDepthRails(depth);
 
