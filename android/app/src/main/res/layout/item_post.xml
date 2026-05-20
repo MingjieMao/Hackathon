@@ -70,14 +70,14 @@
         <LinearLayout
             android:id="@+id/layoutPostVotes"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="50dp"
             android:background="@drawable/bg_pill"
             android:gravity="center_vertical"
             android:orientation="horizontal"
             android:paddingStart="12dp"
-            android:paddingTop="8dp"
             android:paddingEnd="12dp"
-            android:paddingBottom="8dp">
+            android:paddingTop="0dp"
+            android:paddingBottom="0dp">
 
                 <ImageButton
                     android:id="@+id/buttonPostUpvote"
@@ -118,23 +118,37 @@
                     android:src="@drawable/ic_vote_down_outline_24" />
         </LinearLayout>
 
-        <TextView
+        <LinearLayout
             android:id="@+id/buttonPostComments"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="50dp"
             android:layout_marginStart="12dp"
             android:background="@drawable/bg_pill"
             android:clickable="true"
-            android:drawableStart="@drawable/ic_comment_outline_24"
-            android:drawablePadding="8dp"
             android:focusable="true"
+            android:gravity="center"
+            android:minWidth="82dp"
+            android:orientation="horizontal"
             android:paddingStart="14dp"
-            android:paddingTop="10dp"
             android:paddingEnd="14dp"
-            android:paddingBottom="10dp"
-            android:textAppearance="?attr/textAppearanceBodyMedium"
-            android:textColor="@color/ink_primary"
-            android:textStyle="bold" />
+            android:paddingTop="0dp"
+            android:paddingBottom="0dp">
+
+            <ImageView
+                android:id="@+id/imagePostCommentsIcon"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_comment_outline_24" />
+
+            <TextView
+                android:id="@+id/textPostCommentsCount"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:textAppearance="?attr/textAppearanceBodyMedium"
+                android:textColor="@color/ink_primary"
+                android:textStyle="bold" />
+        </LinearLayout>
     </LinearLayout>
 
     <View

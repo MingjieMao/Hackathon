@@ -7,6 +7,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -36,7 +37,7 @@ public class PostViewerActivity extends AppCompatActivity {
     private TextView textPostViewerBody;
     private TextView textPostViewerState;
     private TextView textPostViewerScore;
-    private TextView textPostViewerComments;
+    private TextView textPostViewerCommentsCount;
     private TextView textCommentsEmpty;
     private ImageView imagePostViewerCommunityAvatar;
     private ImageButton buttonPostUpvote;
@@ -71,7 +72,7 @@ public class PostViewerActivity extends AppCompatActivity {
         textPostViewerBody = findViewById(R.id.textPostViewerBody);
         textPostViewerState = findViewById(R.id.textPostViewerState);
         textPostViewerScore = findViewById(R.id.textPostViewerScore);
-        textPostViewerComments = findViewById(R.id.textPostViewerComments);
+        textPostViewerCommentsCount = findViewById(R.id.textPostViewerCommentsCount);
         textCommentsEmpty = findViewById(R.id.textCommentsEmpty);
         imagePostViewerCommunityAvatar = findViewById(R.id.imagePostViewerCommunityAvatar);
         buttonPostUpvote = findViewById(R.id.buttonPostUpvote);
@@ -134,7 +135,7 @@ public class PostViewerActivity extends AppCompatActivity {
         ));
         textPostViewerTitle.setText(post.topic);
         textPostViewerBody.setText(AppData.getPostBody(post));
-        textPostViewerComments.setText(AppData.getPostReplyCountLabel(this, post));
+        textPostViewerCommentsCount.setText(AppData.getPostReplyCountLabel(this, post));
         textPostViewerScore.setText(String.valueOf(AppData.getPostVoteScore(post)));
         updatePostVoteColors();
 
@@ -199,9 +200,13 @@ public class PostViewerActivity extends AppCompatActivity {
         buttonPostDownvote.setImageResource(voteDirection < 0
                 ? R.drawable.ic_vote_down_filled_24
                 : R.drawable.ic_vote_down_outline_24);
-        boolean reported = AppData.hasCurrentUserReported(rootMessage);
-        buttonPostMenu.setImageResource(reported ? R.drawable.ic_flag_24 : R.drawable.ic_flag_outline_24);
-        buttonPostMenu.setColorFilter(reported ? reportColor : neutralColor);
+        boolean activeAction = AppData.isAdminMode() ? AppData.isHidden(rootMessage) : AppData.hasCurrentUserReported(rootMessage);
+        if (AppData.isAdminMode()) {
+            buttonPostMenu.setImageResource(R.drawable.ic_hidden_24);
+        } else {
+            buttonPostMenu.setImageResource(activeAction ? R.drawable.ic_flag_24 : R.drawable.ic_flag_outline_24);
+        }
+        buttonPostMenu.setColorFilter(activeAction ? reportColor : neutralColor);
         textPostViewerScore.setTextColor(voteDirection > 0
                 ? upvoteColor
                 : voteDirection < 0 ? downvoteColor : primaryColor);

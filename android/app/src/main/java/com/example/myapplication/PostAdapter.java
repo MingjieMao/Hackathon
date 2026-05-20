@@ -5,6 +5,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -101,7 +102,8 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
         private final TextView textPostScore;
         private final ImageButton buttonPostUpvote;
         private final ImageButton buttonPostDownvote;
-        private final TextView buttonPostComments;
+        private final LinearLayout buttonPostComments;
+        private final TextView textPostCommentsCount;
 
         ViewHolder(View view) {
             super(view);
@@ -114,6 +116,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
             buttonPostUpvote = view.findViewById(R.id.buttonPostUpvote);
             buttonPostDownvote = view.findViewById(R.id.buttonPostDownvote);
             buttonPostComments = view.findViewById(R.id.buttonPostComments);
+            textPostCommentsCount = view.findViewById(R.id.textPostCommentsCount);
         }
 
         void display(Post post) {
@@ -127,7 +130,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
             textPostTitle.setText(post.topic);
             textPostBody.setText(AppData.getPostBodyPreview(post));
             textPostScore.setText(String.valueOf(AppData.getPostVoteScore(post)));
-            buttonPostComments.setText(AppData.getPostReplyCountLabel(itemView.getContext(), post));
+            textPostCommentsCount.setText(AppData.getPostReplyCountLabel(itemView.getContext(), post));
 
             int voteDirection = AppData.getCurrentUserPostVote(post);
             buttonPostUpvote.setImageResource(voteDirection > 0

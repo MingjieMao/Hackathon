@@ -175,9 +175,13 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
             buttonMessageDownvote.setImageResource(voteDirection < 0
                     ? R.drawable.ic_vote_down_filled_24
                     : R.drawable.ic_vote_down_outline_24);
-            boolean reported = AppData.hasCurrentUserReported(message);
-            buttonMessageMenu.setImageResource(reported ? R.drawable.ic_flag_24 : R.drawable.ic_flag_outline_24);
-            buttonMessageMenu.setColorFilter(reported ? reportColor : neutralColor);
+            boolean activeAction = AppData.isAdminMode() ? AppData.isHidden(message) : AppData.hasCurrentUserReported(message);
+            if (AppData.isAdminMode()) {
+                buttonMessageMenu.setImageResource(R.drawable.ic_hidden_24);
+            } else {
+                buttonMessageMenu.setImageResource(activeAction ? R.drawable.ic_flag_24 : R.drawable.ic_flag_outline_24);
+            }
+            buttonMessageMenu.setColorFilter(activeAction ? reportColor : neutralColor);
             imageMessageReplyIcon.setColorFilter(primaryColor);
             textMessageReplyCount.setTextColor(primaryColor);
             textMessageScore.setTextColor(voteDirection > 0
