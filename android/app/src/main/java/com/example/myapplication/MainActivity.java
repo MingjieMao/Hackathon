@@ -29,6 +29,8 @@ import androidx.core.splashscreen.SplashScreen;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
 import androidx.viewpager2.widget.ViewPager2;
+import android.animation.AnimatorSet;
+import android.animation.ObjectAnimator;
 
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
@@ -47,6 +49,7 @@ public class MainActivity extends AppCompatActivity {
     private View tabNotifications;
     private View tabYou;
     private ImageView iconChannels;
+    private TextView channelDots;
     private ImageView iconNotifications;
     private ImageView iconYou;
     private TextView labelChannels;
@@ -78,6 +81,7 @@ public class MainActivity extends AppCompatActivity {
         tabNotifications = findViewById(R.id.tabNotifications);
         tabYou = findViewById(R.id.tabYou);
         iconChannels = findViewById(R.id.iconChannels);
+        channelDots = findViewById(R.id.channelDots);
         iconNotifications = findViewById(R.id.iconNotifications);
         iconYou = findViewById(R.id.iconYou);
         labelChannels = findViewById(R.id.labelChannels);
@@ -319,10 +323,151 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    private void playChannelDotsHint() {
+        if (channelDots == null) {
+            return;
+        }
+
+        channelDots.animate().cancel();
+        iconChannels.animate().cancel();
+
+        channelDots.setAlpha(0f);
+        channelDots.setScaleX(0.85f);
+        channelDots.setScaleY(0.85f);
+        channelDots.setTranslationY(0f);
+
+        iconChannels.setScaleX(1.0f);
+        iconChannels.setScaleY(1.0f);
+
+        ObjectAnimator dotsAlpha = ObjectAnimator.ofFloat(
+                channelDots,
+                View.ALPHA,
+                0f,
+                1f,
+                1f,
+                0f
+        );
+
+        ObjectAnimator dotsScaleX = ObjectAnimator.ofFloat(
+                channelDots,
+                View.SCALE_X,
+                0.85f,
+                1.35f,
+                1.35f,
+                0.85f
+        );
+
+        ObjectAnimator dotsScaleY = ObjectAnimator.ofFloat(
+                channelDots,
+                View.SCALE_Y,
+                0.85f,
+                1.35f,
+                1.35f,
+                0.85f
+        );
+
+        ObjectAnimator iconScaleX = ObjectAnimator.ofFloat(
+                iconChannels,
+                View.SCALE_X,
+                1.0f,
+                1.28f,
+                1.28f,
+                1.0f
+        );
+
+        ObjectAnimator iconScaleY = ObjectAnimator.ofFloat(
+                iconChannels,
+                View.SCALE_Y,
+                1.0f,
+                1.28f,
+                1.28f,
+                1.0f
+        );
+
+        AnimatorSet set = new AnimatorSet();
+        set.playTogether(dotsAlpha, dotsScaleX, dotsScaleY, iconScaleX, iconScaleY);
+        set.setDuration(1000L);
+        set.setInterpolator(new PathInterpolator(0.22f, 1f, 0.36f, 1f));
+        set.start();
+    }
+
+    private void playNotificationShakeHint() {
+        iconNotifications.animate().cancel();
+        iconNotifications.setTranslationX(0f);
+
+        ObjectAnimator shake = ObjectAnimator.ofFloat(
+                iconNotifications,
+                View.TRANSLATION_X,
+                0f,
+                -dp(6),
+                dp(6),
+                -dp(6),
+                dp(6),
+                0f,
+                -dp(6),
+                dp(6),
+                -dp(6),
+                dp(6),
+                0f
+        );
+
+        shake.setDuration(720L);
+        shake.setInterpolator(new PathInterpolator(0.36f, 0f, 0.66f, -0.56f));
+        shake.start();
+    }
+
+    private void playYouSlideHint() {
+        iconYou.animate().cancel();
+
+        iconYou.setAlpha(0f);
+        iconYou.setTranslationX(-dp(22));
+
+        ObjectAnimator slide = ObjectAnimator.ofFloat(
+                iconYou,
+                View.TRANSLATION_X,
+                -dp(22),
+                0f
+        );
+
+        ObjectAnimator fade = ObjectAnimator.ofFloat(
+                iconYou,
+                View.ALPHA,
+                0f,
+                1f
+        );
+
+        AnimatorSet set = new AnimatorSet();
+        set.playTogether(slide, fade);
+        set.setDuration(1000L);
+        set.setInterpolator(new PathInterpolator(0.22f, 1f, 0.36f, 1f));
+        set.start();
+    }
+
+    private void playTabHint(int page) {
+        if (page == MainPagerAdapter.PAGE_CHANNELS) {
+            playChannelDotsHint();
+        } else if (page == MainPagerAdapter.PAGE_NOTIFICATIONS) {
+            playNotificationShakeHint();
+        } else if (page == MainPagerAdapter.PAGE_YOU) {
+            playYouSlideHint();
+        }
+    }
+
     private void configureTabBar() {
-        tabChannels.setOnClickListener(v -> setPage(MainPagerAdapter.PAGE_CHANNELS, true));
-        tabNotifications.setOnClickListener(v -> setPage(MainPagerAdapter.PAGE_NOTIFICATIONS, true));
-        tabYou.setOnClickListener(v -> setPage(MainPagerAdapter.PAGE_YOU, true));
+        tabChannels.setOnClickListener(v -> {
+            setPage(MainPagerAdapter.PAGE_CHANNELS, true);
+            playTabHint(MainPagerAdapter.PAGE_CHANNELS);
+        });
+
+        tabNotifications.setOnClickListener(v -> {
+            setPage(MainPagerAdapter.PAGE_NOTIFICATIONS, true);
+            playTabHint(MainPagerAdapter.PAGE_NOTIFICATIONS);
+        });
+
+        tabYou.setOnClickListener(v -> {
+            setPage(MainPagerAdapter.PAGE_YOU, true);
+            playTabHint(MainPagerAdapter.PAGE_YOU);
+        });
 
         navShell.addOnLayoutChangeListener((v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) -> {
             if (left != oldLeft || right != oldRight) {

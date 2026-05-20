@@ -36,8 +36,8 @@
     <color name="tab_indicator_fill_top">#26FFFFFF</color>
     <color name="tab_indicator_fill_bottom">#26FFFFFF</color>
     <color name="tab_indicator_stroke">#32FFFFFF</color>
-    <color name="nav_active">#FFFFFF</color>
-    <color name="nav_inactive">#8E95A3</color>
+    <color name="nav_active">#4F8DFF</color>
+    <color name="nav_inactive">#8A8F98</color>
     <color name="tab_press_ripple">#00000000</color>
     <color name="launcher_brand">#4752C4</color>
 </resources>
