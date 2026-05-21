@@ -56,13 +56,19 @@ public class MainActivity extends AppCompatActivity {
     private View navIndicator;
     private View tabChannels;
     private View tabNotifications;
+    private View tabMarket;
+    private View tabLeaderboard;
     private View tabYou;
     private ImageView iconChannels;
     private TextView channelDots;
     private ImageView iconNotifications;
+    private ImageView iconMarket;
+    private ImageView iconLeaderboard;
     private ImageView iconYou;
     private TextView labelChannels;
     private TextView labelNotifications;
+    private TextView labelMarket;
+    private TextView labelLeaderboard;
     private TextView labelYou;
     private LinearLayout buttonDrawerForumAnu;
     private LinearLayout buttonDrawerForumUnsw;
@@ -102,13 +108,19 @@ public class MainActivity extends AppCompatActivity {
         navIndicator = findViewById(R.id.navIndicator);
         tabChannels = findViewById(R.id.tabChannels);
         tabNotifications = findViewById(R.id.tabNotifications);
+        tabMarket = findViewById(R.id.tabMarket);
+        tabLeaderboard = findViewById(R.id.tabLeaderboard);
         tabYou = findViewById(R.id.tabYou);
         iconChannels = findViewById(R.id.iconChannels);
         channelDots = findViewById(R.id.channelDots);
         iconNotifications = findViewById(R.id.iconNotifications);
+        iconMarket = findViewById(R.id.iconMarket);
+        iconLeaderboard = findViewById(R.id.iconLeaderboard);
         iconYou = findViewById(R.id.iconYou);
         labelChannels = findViewById(R.id.labelChannels);
         labelNotifications = findViewById(R.id.labelNotifications);
+        labelMarket = findViewById(R.id.labelMarket);
+        labelLeaderboard = findViewById(R.id.labelLeaderboard);
         labelYou = findViewById(R.id.labelYou);
 
         buttonDrawerForumAnu = findViewById(R.id.buttonDrawerForumAnu);
@@ -169,6 +181,10 @@ public class MainActivity extends AppCompatActivity {
 
     public void openDrawer() {
         drawerRoot.openDrawer(GravityCompat.START);
+    }
+
+    public void refreshAllPages() {
+        notifyPagesChanged();
     }
 
     public void toggleViewerMode() {
@@ -542,7 +558,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void configurePager() {
         viewPager.setAdapter(new MainPagerAdapter(this));
-        viewPager.setOffscreenPageLimit(3);
+        viewPager.setOffscreenPageLimit(MainPagerAdapter.PAGE_COUNT);
         viewPager.setUserInputEnabled(false);
         viewPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
             @Override
@@ -680,11 +696,44 @@ public class MainActivity extends AppCompatActivity {
         set.start();
     }
 
+    private void playMarketPulseHint() {
+        iconMarket.animate().cancel();
+        iconMarket.setScaleX(1f);
+        iconMarket.setScaleY(1f);
+        iconMarket.animate()
+                .scaleX(1.22f)
+                .scaleY(1.22f)
+                .setDuration(120L)
+                .withEndAction(() -> iconMarket.animate()
+                        .scaleX(1f)
+                        .scaleY(1f)
+                        .setDuration(240L)
+                        .setInterpolator(new PathInterpolator(0.22f, 1f, 0.36f, 1f))
+                        .start())
+                .start();
+    }
+
+    private void playLeaderboardLiftHint() {
+        iconLeaderboard.animate().cancel();
+        iconLeaderboard.setTranslationY(dp(10));
+        iconLeaderboard.setAlpha(0.45f);
+        iconLeaderboard.animate()
+                .translationY(0f)
+                .alpha(1f)
+                .setDuration(320L)
+                .setInterpolator(new PathInterpolator(0.22f, 1f, 0.36f, 1f))
+                .start();
+    }
+
     private void playTabHint(int page) {
         if (page == MainPagerAdapter.PAGE_CHANNELS) {
             playChannelDotsHint();
         } else if (page == MainPagerAdapter.PAGE_NOTIFICATIONS) {
             playNotificationShakeHint();
+        } else if (page == MainPagerAdapter.PAGE_MARKET) {
+            playMarketPulseHint();
+        } else if (page == MainPagerAdapter.PAGE_LEADERBOARD) {
+            playLeaderboardLiftHint();
         } else if (page == MainPagerAdapter.PAGE_YOU) {
             playYouSlideHint();
         }
@@ -698,6 +747,14 @@ public class MainActivity extends AppCompatActivity {
         tabNotifications.setOnClickListener(v -> {
             setPage(MainPagerAdapter.PAGE_NOTIFICATIONS, true);
             playTabHint(MainPagerAdapter.PAGE_NOTIFICATIONS);
+        });
+        tabMarket.setOnClickListener(v -> {
+            setPage(MainPagerAdapter.PAGE_MARKET, true);
+            playTabHint(MainPagerAdapter.PAGE_MARKET);
+        });
+        tabLeaderboard.setOnClickListener(v -> {
+            setPage(MainPagerAdapter.PAGE_LEADERBOARD, true);
+            playTabHint(MainPagerAdapter.PAGE_LEADERBOARD);
         });
         tabYou.setOnClickListener(v -> {
             setPage(MainPagerAdapter.PAGE_YOU, true);
@@ -798,6 +855,8 @@ public class MainActivity extends AppCompatActivity {
     private void updateTabSelection(int page) {
         updateTab(tabChannels, iconChannels, labelChannels, page == MainPagerAdapter.PAGE_CHANNELS);
         updateTab(tabNotifications, iconNotifications, labelNotifications, page == MainPagerAdapter.PAGE_NOTIFICATIONS);
+        updateTab(tabMarket, iconMarket, labelMarket, page == MainPagerAdapter.PAGE_MARKET);
+        updateTab(tabLeaderboard, iconLeaderboard, labelLeaderboard, page == MainPagerAdapter.PAGE_LEADERBOARD);
         updateTab(tabYou, iconYou, labelYou, page == MainPagerAdapter.PAGE_YOU);
     }
 
@@ -849,7 +908,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         int innerWidth = navShell.getWidth() - navShell.getPaddingLeft() - navShell.getPaddingRight();
-        int slotWidth = innerWidth / 3;
+        int slotWidth = innerWidth / MainPagerAdapter.PAGE_COUNT;
         int indicatorInset = dp(1);
         int indicatorWidth = slotWidth - (indicatorInset * 2);
         int centeredOffset = indicatorInset;

@@ -50,4 +50,10 @@
     <color name="forum_um_header">#178276</color>
     <color name="forum_header_on">#FFFFFF</color>
     <color name="forum_header_on_secondary">#E8EDF7</color>
+    <color name="market_gain">#5BD4A7</color>
+    <color name="market_loss">#FF8897</color>
+    <color name="chart_grid">#44FFFFFF</color>
+    <color name="rank_gold">#F4D35E</color>
+    <color name="rank_silver">#798396</color>
+    <color name="rank_bronze">#B07C5B</color>
 </resources>

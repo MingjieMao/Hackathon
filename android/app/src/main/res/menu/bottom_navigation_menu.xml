@@ -9,6 +9,14 @@
         android:icon="@drawable/ic_bell_24"
         android:title="@string/nav_notifications" />
     <item
+        android:id="@+id/nav_market"
+        android:icon="@drawable/ic_market_24"
+        android:title="@string/nav_market" />
+    <item
+        android:id="@+id/nav_leaderboard"
+        android:icon="@drawable/ic_leaderboard_24"
+        android:title="@string/nav_leaderboard" />
+    <item
         android:id="@+id/nav_you"
         android:icon="@drawable/ic_user_24"
         android:title="@string/nav_you" />
