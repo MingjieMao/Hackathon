@@ -44,6 +44,9 @@ public class MainActivity extends AppCompatActivity {
     private static final String EXTRA_START_PAGE = "start_page";
     private static final String STATE_CURRENT_PAGE = "current_page";
     private static final long TAB_ANIMATION_MS = 320L;
+    private static final long PAGE_FADE_OUT_MS = 85L;
+    private static final long PAGE_FADE_IN_MS = 150L;
+    private static final float PAGE_TRANSITION_MIN_ALPHA = 0.18f;
 
     private DrawerLayout drawerRoot;
     private View mainContent;
@@ -73,6 +76,7 @@ public class MainActivity extends AppCompatActivity {
     private TextView textDrawerForumUnsw;
     private TextView textDrawerForumUsyd;
     private TextView textDrawerForumUm;
+    private boolean pageTransitionRunning;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -539,6 +543,7 @@ public class MainActivity extends AppCompatActivity {
     private void configurePager() {
         viewPager.setAdapter(new MainPagerAdapter(this));
         viewPager.setOffscreenPageLimit(3);
+        viewPager.setUserInputEnabled(false);
         viewPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
             @Override
             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
@@ -550,6 +555,7 @@ public class MainActivity extends AppCompatActivity {
             public void onPageSelected(int position) {
                 super.onPageSelected(position);
                 updateTabSelection(position);
+                syncIndicatorTo(position, true);
             }
         });
     }
@@ -707,12 +713,39 @@ public class MainActivity extends AppCompatActivity {
 
     private void setPage(int page, boolean smoothScroll) {
         if (viewPager.getCurrentItem() != page) {
-            viewPager.setCurrentItem(page, smoothScroll);
+            animatePageJump(page);
             return;
         }
 
         updateTabSelection(page);
         syncIndicatorTo(page, true);
+    }
+
+    private void animatePageJump(int page) {
+        if (pageTransitionRunning) {
+            return;
+        }
+
+        pageTransitionRunning = true;
+        viewPager.animate().cancel();
+        viewPager.setLayerType(View.LAYER_TYPE_HARDWARE, null);
+        viewPager.animate()
+                .alpha(PAGE_TRANSITION_MIN_ALPHA)
+                .setDuration(PAGE_FADE_OUT_MS)
+                .setInterpolator(new PathInterpolator(0.32f, 0f, 0.67f, 0f))
+                .withEndAction(() -> {
+                    viewPager.setCurrentItem(page, false);
+                    viewPager.animate()
+                            .alpha(1f)
+                            .setDuration(PAGE_FADE_IN_MS)
+                            .setInterpolator(new PathInterpolator(0.22f, 1f, 0.36f, 1f))
+                            .withEndAction(() -> {
+                                pageTransitionRunning = false;
+                                viewPager.setLayerType(View.LAYER_TYPE_NONE, null);
+                            })
+                            .start();
+                })
+                .start();
     }
 
     private void refreshDrawerUi() {
