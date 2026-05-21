@@ -137,6 +137,10 @@ public final class AppData {
         return getForumAvatarResId(selectedForumKey);
     }
 
+    public static int getSelectedForumHeaderColorResId() {
+        return getForumHeaderColorResId(selectedForumKey);
+    }
+
     public static String getForumLabel(Context context, String forumKey) {
         if (FORUM_UNSW.equals(forumKey)) {
             return context.getString(R.string.forum_unsw_label);
@@ -368,6 +372,23 @@ public final class AppData {
             return R.drawable.avatar_um;
         }
         return R.drawable.avatar_anu;
+    }
+
+    public static int getForumHeaderColorResId(String forumKey) {
+        if (FORUM_UNSW.equals(forumKey)) {
+            return R.color.forum_unsw_header;
+        }
+        if (FORUM_USYD.equals(forumKey)) {
+            return R.color.forum_usyd_header;
+        }
+        if (FORUM_UM.equals(forumKey)) {
+            return R.color.forum_um_header;
+        }
+        return R.color.forum_anu_header;
+    }
+
+    public static int getPostHeaderColorResId(Post post) {
+        return getForumHeaderColorResId(getForumKey(post));
     }
 
     public static String getPostBody(Post post) {

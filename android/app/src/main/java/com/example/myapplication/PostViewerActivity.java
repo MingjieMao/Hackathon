@@ -2,6 +2,7 @@ package com.example.myapplication;
 
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.Editable;
@@ -58,6 +59,7 @@ public class PostViewerActivity extends AppCompatActivity {
     private ImageButton buttonPostUpvote;
     private ImageButton buttonPostDownvote;
     private LinearLayout buttonPostComments;
+    private LinearLayout layoutPostViewerHeaderCard;
     private Button buttonBack;
     private ImageButton buttonPostMenu;
     private NestedScrollView postViewerScroll;
@@ -133,6 +135,7 @@ public class PostViewerActivity extends AppCompatActivity {
         imagePostViewerCommunityAvatar = findViewById(R.id.imagePostViewerCommunityAvatar);
         imagePostViewerAttachment = findViewById(R.id.imagePostViewerAttachment);
         buttonPostComments = findViewById(R.id.textPostViewerComments);
+        layoutPostViewerHeaderCard = findViewById(R.id.layoutPostViewerHeaderCard);
         buttonPostUpvote = findViewById(R.id.buttonPostUpvote);
         buttonPostDownvote = findViewById(R.id.buttonPostDownvote);
         buttonBack = findViewById(R.id.buttonBack);
@@ -195,6 +198,7 @@ public class PostViewerActivity extends AppCompatActivity {
         ));
         textPostViewerTitle.setText(post.topic);
         textPostViewerBody.setText(AppData.getPostBody(post));
+        applyHeaderTheme();
         String postImageUri = AppData.getPostImageUri(post);
         if (postImageUri == null || postImageUri.isEmpty()) {
             imagePostViewerAttachment.setImageDrawable(null);
@@ -239,7 +243,7 @@ public class PostViewerActivity extends AppCompatActivity {
 
     private void updatePostVoteColors() {
         int upvoteColor = ContextCompat.getColor(this, R.color.vote_up);
-        int neutralColor = ContextCompat.getColor(this, R.color.ink_faint);
+        int neutralColor = ContextCompat.getColor(this, R.color.forum_header_on_secondary);
         int downvoteColor = ContextCompat.getColor(this, R.color.vote_down);
         int primaryColor = ContextCompat.getColor(this, R.color.ink_primary);
         int reportColor = ContextCompat.getColor(this, R.color.danger_ink);
@@ -261,6 +265,28 @@ public class PostViewerActivity extends AppCompatActivity {
         textPostViewerScore.setTextColor(voteDirection > 0
                 ? upvoteColor
                 : voteDirection < 0 ? downvoteColor : primaryColor);
+    }
+
+    private void applyHeaderTheme() {
+        if (post == null || layoutPostViewerHeaderCard == null) {
+            return;
+        }
+
+        int headerColor = ContextCompat.getColor(this, AppData.getPostHeaderColorResId(post));
+        int onColor = ContextCompat.getColor(this, R.color.forum_header_on);
+        int onSecondary = ContextCompat.getColor(this, R.color.forum_header_on_secondary);
+
+        GradientDrawable background = new GradientDrawable();
+        background.setShape(GradientDrawable.RECTANGLE);
+        background.setCornerRadius(dp(28));
+        background.setColor(headerColor);
+        layoutPostViewerHeaderCard.setBackground(background);
+
+        textPostViewerForum.setTextColor(onSecondary);
+        textPostViewerMeta.setTextColor(onSecondary);
+        textPostViewerTitle.setTextColor(onColor);
+        textPostViewerBody.setTextColor(onSecondary);
+        textPostViewerState.setTextColor(onSecondary);
     }
 
     private void animateVote(View view) {

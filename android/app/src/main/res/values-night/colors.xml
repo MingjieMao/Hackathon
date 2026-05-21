@@ -44,4 +44,10 @@
     <color name="tab_press_ripple">#00000000</color>
     <color name="launcher_brand">#4752C4</color>
     <color name="avatar_border">#FFFFFF</color>
+    <color name="forum_anu_header">#8C3250</color>
+    <color name="forum_unsw_header">#A87712</color>
+    <color name="forum_usyd_header">#2D65A8</color>
+    <color name="forum_um_header">#178276</color>
+    <color name="forum_header_on">#FFFFFF</color>
+    <color name="forum_header_on_secondary">#E8EDF7</color>
 </resources>

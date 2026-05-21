@@ -12,118 +12,127 @@
         android:orientation="vertical">
 
         <LinearLayout
+            android:id="@+id/layoutChannelsHeader"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="center_vertical"
-            android:orientation="horizontal">
-
-            <ImageButton
-                android:id="@+id/buttonChannelsDrawer"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:background="@android:color/transparent"
-                android:contentDescription="@string/main_open_drawer"
-                android:padding="12dp"
-                android:src="@drawable/ic_menu_24" />
-
-            <ImageView
-                android:id="@+id/imageChannelsForumAvatar"
-                android:layout_width="42dp"
-                android:layout_height="42dp"
-                android:layout_marginStart="4dp"
-                android:background="@drawable/bg_community_avatar"
-                android:contentDescription="@string/drawer_communities_title"
-                android:padding="4dp"
-                android:scaleType="centerInside" />
+            android:background="@drawable/bg_card"
+            android:orientation="vertical"
+            android:padding="16dp">
 
             <LinearLayout
-                android:layout_width="0dp"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="10dp"
-                android:layout_weight="1"
-                android:orientation="vertical">
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <ImageButton
+                    android:id="@+id/buttonChannelsDrawer"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:background="@android:color/transparent"
+                    android:contentDescription="@string/main_open_drawer"
+                    android:padding="12dp"
+                    android:src="@drawable/ic_menu_24" />
+
+                <ImageView
+                    android:id="@+id/imageChannelsForumAvatar"
+                    android:layout_width="42dp"
+                    android:layout_height="42dp"
+                    android:layout_marginStart="4dp"
+                    android:background="@drawable/bg_community_avatar"
+                    android:contentDescription="@string/drawer_communities_title"
+                    android:padding="4dp"
+                    android:scaleType="centerInside" />
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="10dp"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/textChannelsTitle"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textAppearance="?attr/textAppearanceHeadlineSmall"
+                        android:textColor="@color/ink_primary"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/textChannelsSubtitle"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:textAppearance="?attr/textAppearanceBodyMedium"
+                        android:textColor="@color/ink_secondary" />
+                </LinearLayout>
 
                 <TextView
-                    android:id="@+id/textChannelsTitle"
-                    android:layout_width="match_parent"
+                    android:id="@+id/textChannelsMode"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textAppearance="?attr/textAppearanceHeadlineSmall"
-                    android:textColor="@color/ink_primary"
+                    android:background="@drawable/bg_mode_pill"
+                    android:paddingStart="14dp"
+                    android:paddingTop="8dp"
+                    android:paddingEnd="14dp"
+                    android:paddingBottom="8dp"
+                    android:textAppearance="?attr/textAppearanceTitleSmall"
+                    android:textColor="@color/nav_active"
                     android:textStyle="bold" />
-
-                <TextView
-                    android:id="@+id/textChannelsSubtitle"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
-                    android:textAppearance="?attr/textAppearanceBodyMedium"
-                    android:textColor="@color/ink_secondary" />
             </LinearLayout>
 
-            <TextView
-                android:id="@+id/textChannelsMode"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:background="@drawable/bg_mode_pill"
-                android:paddingStart="14dp"
-                android:paddingTop="8dp"
-                android:paddingEnd="14dp"
-                android:paddingBottom="8dp"
-                android:textAppearance="?attr/textAppearanceTitleSmall"
-                android:textColor="@color/nav_active"
-                android:textStyle="bold" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/layoutChannelSearch"
-            android:layout_width="match_parent"
-            android:layout_height="56dp"
-            android:layout_marginTop="16dp"
-            android:background="@drawable/bg_search_bar"
-            android:clickable="true"
-            android:focusable="false"
-            android:foreground="@null"
-            android:gravity="center_vertical"
-            android:orientation="horizontal"
-            android:paddingStart="16dp"
-            android:paddingEnd="8dp"
-            android:stateListAnimator="@null">
-
-            <ImageView
-                android:id="@+id/imageChannelSearchIcon"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:src="@drawable/ic_search_24" />
-
-            <EditText
-                android:id="@+id/inputChannelSearch"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_marginStart="12dp"
-                android:layout_weight="1"
-                android:background="@null"
-                android:gravity="center_vertical"
-                android:imeOptions="actionSearch"
-                android:inputType="text"
-                android:padding="0dp"
-                android:singleLine="true"
-                android:stateListAnimator="@null"
-                android:textAppearance="?attr/textAppearanceBodyMedium"
-                android:textColor="@color/ink_primary"
-                android:textColorHint="@color/ink_tertiary" />
-
-            <ImageButton
-                android:id="@+id/buttonClearSearch"
-                android:layout_width="36dp"
-                android:layout_height="36dp"
-                android:background="@android:color/transparent"
-                android:contentDescription="@string/action_clear_search"
+            <LinearLayout
+                android:id="@+id/layoutChannelSearch"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:layout_marginTop="14dp"
+                android:background="@drawable/bg_search_bar"
+                android:clickable="true"
                 android:focusable="false"
                 android:foreground="@null"
-                android:padding="8dp"
-                android:src="@drawable/ic_close_24"
-                android:stateListAnimator="@null"
-                android:visibility="gone" />
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingStart="16dp"
+                android:paddingEnd="8dp"
+                android:stateListAnimator="@null">
+
+                <ImageView
+                    android:id="@+id/imageChannelSearchIcon"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/ic_search_24" />
+
+                <EditText
+                    android:id="@+id/inputChannelSearch"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_marginStart="12dp"
+                    android:layout_weight="1"
+                    android:background="@null"
+                    android:gravity="center_vertical"
+                    android:imeOptions="actionSearch"
+                    android:inputType="text"
+                    android:padding="0dp"
+                    android:singleLine="true"
+                    android:stateListAnimator="@null"
+                    android:textAppearance="?attr/textAppearanceBodyMedium"
+                    android:textColor="@color/ink_primary"
+                    android:textColorHint="@color/ink_tertiary" />
+
+                <ImageButton
+                    android:id="@+id/buttonClearSearch"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:background="@android:color/transparent"
+                    android:contentDescription="@string/action_clear_search"
+                    android:focusable="false"
+                    android:foreground="@null"
+                    android:padding="8dp"
+                    android:src="@drawable/ic_close_24"
+                    android:stateListAnimator="@null"
+                    android:visibility="gone" />
+            </LinearLayout>
         </LinearLayout>
 
         <LinearLayout
