@@ -98,21 +98,109 @@
                 android:textColor="@color/ink_primary"
                 android:textColorHint="@color/ink_tertiary" />
 
-            <Button
-                android:id="@+id/buttonAddPostImage"
-                android:layout_width="wrap_content"
+            <HorizontalScrollView
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
-                app:backgroundTint="@color/tab_bar_fill"
-                app:strokeColor="@color/surface_border"
-                app:strokeWidth="1.5dp"
-                app:cornerRadius="999dp"
-                app:icon="@drawable/ic_image_24"
-                app:iconSize="18dp"
-                app:iconTint="@color/ink_primary"
-                android:text="@string/action_add_image"
-                android:textAllCaps="false"
-                android:textColor="@color/ink_primary" />
+                android:layout_marginTop="10dp"
+                android:overScrollMode="never"
+                android:scrollbars="none">
+
+                <RadioGroup
+                    android:id="@+id/radioPostCategory"
+                    android:layout_width="wrap_content"
+                    android:layout_height="42dp"
+                    android:orientation="horizontal">
+
+                    <RadioButton
+                        android:id="@+id/radioCategoryStudy"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:checked="true"
+                        android:text="@string/category_study" />
+
+                    <RadioButton
+                        android:id="@+id/radioCategorySocial"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:layout_marginStart="8dp"
+                        android:text="@string/category_social" />
+
+                    <RadioButton
+                        android:id="@+id/radioCategoryFinals"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:layout_marginStart="8dp"
+                        android:text="@string/category_finals" />
+
+                    <RadioButton
+                        android:id="@+id/radioCategoryAi"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:layout_marginStart="8dp"
+                        android:text="@string/category_ai" />
+
+                    <RadioButton
+                        android:id="@+id/radioCategoryCustom"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:layout_marginStart="8dp"
+                        android:text="@string/category_custom" />
+                </RadioGroup>
+            </HorizontalScrollView>
+
+            <EditText
+                android:id="@+id/inputPostCustomCategory"
+                android:layout_width="match_parent"
+                android:layout_height="46dp"
+                android:layout_marginTop="8dp"
+                android:background="@drawable/bg_search_bar"
+                android:hint="@string/category_custom_hint"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"
+                android:singleLine="true"
+                android:textColor="@color/ink_primary"
+                android:textColorHint="@color/ink_tertiary"
+                android:visibility="gone" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_marginTop="10dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <ImageButton
+                    android:id="@+id/buttonAddEmoji"
+                    android:layout_width="44dp"
+                    android:layout_height="44dp"
+                    android:background="@drawable/bg_reply_tool"
+                    android:contentDescription="@string/action_add_emoji"
+                    android:padding="10dp"
+                    android:src="@drawable/ic_emoji_24"
+                    android:tint="@color/ink_primary" />
+
+                <ImageButton
+                    android:id="@+id/buttonAddPostImage"
+                    android:layout_width="44dp"
+                    android:layout_height="44dp"
+                    android:layout_marginStart="4dp"
+                    android:background="@drawable/bg_reply_tool"
+                    android:contentDescription="@string/action_add_image"
+                    android:padding="10dp"
+                    android:src="@drawable/ic_image_24"
+                    android:tint="@color/ink_primary" />
+
+                <ImageButton
+                    android:id="@+id/buttonMentionFriend"
+                    android:layout_width="44dp"
+                    android:layout_height="44dp"
+                    android:layout_marginStart="4dp"
+                    android:background="@drawable/bg_reply_tool"
+                    android:contentDescription="@string/action_mention_friend"
+                    android:padding="10dp"
+                    android:src="@drawable/ic_at_24"
+                    android:tint="@color/ink_primary" />
+            </LinearLayout>
 
             <ImageView
                 android:id="@+id/imagePostPreview"

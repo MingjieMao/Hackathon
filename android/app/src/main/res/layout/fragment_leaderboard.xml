@@ -19,13 +19,6 @@
             android:textColor="@color/ink_primary"
             android:textStyle="bold" />
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:text="@string/leaderboard_subtitle"
-            android:textAppearance="?attr/textAppearanceBodyMedium"
-            android:textColor="@color/ink_secondary" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -141,18 +134,6 @@
             android:textColor="@color/ink_primary"
             android:textStyle="bold" />
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:background="@drawable/bg_mode_pill"
-            android:paddingStart="14dp"
-            android:paddingTop="12dp"
-            android:paddingEnd="14dp"
-            android:paddingBottom="12dp"
-            android:text="@string/leaderboard_note"
-            android:textAppearance="?attr/textAppearanceBodyMedium"
-            android:textColor="@color/ink_primary" />
 
         <LinearLayout
             android:id="@+id/layoutLeaderboardEntries"

@@ -24,8 +24,10 @@ import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
+import java.util.Random;
 
 public class MarketFragment extends Fragment implements RefreshablePage {
     private static final String STATE_SELECTED_MARKET = "selected_market";
@@ -41,7 +43,6 @@ public class MarketFragment extends Fragment implements RefreshablePage {
     private ImageView imageMarketAvatar;
     private TextView textMarketDemoBadge;
     private TextView textMarketForumName;
-    private TextView textMarketPitch;
     private TextView textMarketIndex;
     private TextView textMarketChange;
     private TextView textMarketFormulaLabel;
@@ -49,7 +50,10 @@ public class MarketFragment extends Fragment implements RefreshablePage {
     private TextView textMarketTriggerLabel;
     private MarketCandleChartView viewMarketChart;
     private LinearLayout layoutMarketTriggers;
-    private TextView textTradeHint;
+    private LinearLayout layoutChartPeriod;
+    private LinearLayout layoutTradeMode;
+    private String selectedPeriod = "day";
+    private String tradeMode = "long"; // "long" or "short"
     private TextView textTradePrice;
     private EditText inputTradeAmount;
     private TextView textTradeEstimate;
@@ -58,6 +62,7 @@ public class MarketFragment extends Fragment implements RefreshablePage {
     private TextView textTradeResult;
     private LinearLayout layoutMarketPositions;
     private TextView textPositionEmpty;
+    private TextView textTradeExplain;
     private String selectedMarketKey;
     private String lastTradeMessage;
     private int lastTradeStatus = -1;
@@ -93,7 +98,6 @@ public class MarketFragment extends Fragment implements RefreshablePage {
         imageMarketAvatar = view.findViewById(R.id.imageMarketAvatar);
         textMarketDemoBadge = view.findViewById(R.id.textMarketDemoBadge);
         textMarketForumName = view.findViewById(R.id.textMarketForumName);
-        textMarketPitch = view.findViewById(R.id.textMarketPitch);
         textMarketIndex = view.findViewById(R.id.textMarketIndex);
         textMarketChange = view.findViewById(R.id.textMarketChange);
         textMarketFormulaLabel = view.findViewById(R.id.textMarketFormulaLabel);
@@ -101,7 +105,8 @@ public class MarketFragment extends Fragment implements RefreshablePage {
         textMarketTriggerLabel = view.findViewById(R.id.textMarketTriggerLabel);
         viewMarketChart = view.findViewById(R.id.viewMarketChart);
         layoutMarketTriggers = view.findViewById(R.id.layoutMarketTriggers);
-        textTradeHint = view.findViewById(R.id.textTradeHint);
+        layoutChartPeriod = view.findViewById(R.id.layoutChartPeriod);
+        layoutTradeMode = view.findViewById(R.id.layoutTradeMode);
         textTradePrice = view.findViewById(R.id.textTradePrice);
         inputTradeAmount = view.findViewById(R.id.inputTradeAmount);
         textTradeEstimate = view.findViewById(R.id.textTradeEstimate);
@@ -110,6 +115,7 @@ public class MarketFragment extends Fragment implements RefreshablePage {
         textTradeResult = view.findViewById(R.id.textTradeResult);
         layoutMarketPositions = view.findViewById(R.id.layoutMarketPositions);
         textPositionEmpty = view.findViewById(R.id.textPositionEmpty);
+        textTradeExplain = view.findViewById(R.id.textTradeExplain);
 
         if (savedInstanceState != null) {
             selectedMarketKey = savedInstanceState.getString(STATE_SELECTED_MARKET);
@@ -185,7 +191,7 @@ public class MarketFragment extends Fragment implements RefreshablePage {
 
         renderSelectorRow();
         renderSelectedMarket();
-        renderPositions(snapshot.getPositions());
+        renderPositions(snapshot);
         renderTradeResult();
         updateTradeEstimate();
     }
@@ -218,6 +224,9 @@ public class MarketFragment extends Fragment implements RefreshablePage {
             root.setAlpha(selected ? 1.0f : 0.88f);
             avatar.setImageResource(AppData.getForumAvatarResId(forumKey));
             avatar.setImageTintList(null);
+            if (AppData.FORUM_UM.equals(forumKey)) {
+                avatar.setBackgroundResource(R.drawable.bg_community_avatar_um);
+            }
             label.setText(AppData.getForumLabel(requireContext(), forumKey));
             label.setTextColor(primaryColor);
             label.setTypeface(selected ? Typeface.DEFAULT_BOLD : Typeface.DEFAULT);
@@ -252,18 +261,22 @@ public class MarketFragment extends Fragment implements RefreshablePage {
 
         imageMarketAvatar.setImageResource(AppData.getForumAvatarResId(selectedMarketKey));
         imageMarketAvatar.setImageTintList(null);
+        if (AppData.FORUM_UM.equals(selectedMarketKey)) {
+            imageMarketAvatar.setBackgroundResource(R.drawable.bg_community_avatar_um);
+        } else {
+            imageMarketAvatar.setBackgroundResource(R.drawable.bg_community_avatar);
+        }
         textMarketForumName.setText(AppData.getForumLabel(requireContext(), selectedMarketKey));
         textMarketForumName.setTextColor(onColor);
-        textMarketPitch.setText(market.getPitch(requireContext()));
-        textMarketPitch.setTextColor(onSecondary);
         int livePrice = getLivePrice(market);
-        textMarketIndex.setText(getString(R.string.market_index_format, livePrice));
+        int heatIndex = market.getHeatIndex();
+        textMarketIndex.setText(getString(R.string.market_index_format, heatIndex));
         textMarketIndex.setTextColor(onColor);
         textMarketChange.setText(getString(R.string.market_change_today, formatPercent(getLiveDayChangePercent(market, livePrice))));
         textMarketChange.setTextColor(onColor);
         textMarketChange.setBackground(makePill(Color.argb(40, 255, 255, 255), 999));
         textMarketFormulaLabel.setTextColor(onSecondary);
-        textMarketFormulaValue.setTextColor(onColor);
+        textMarketFormulaValue.setTextColor(onSecondary);
         textMarketFormulaValue.setText(getString(
                 R.string.market_formula_value,
                 market.getPostsToday(),
@@ -272,10 +285,12 @@ public class MarketFragment extends Fragment implements RefreshablePage {
         ));
         textMarketTriggerLabel.setTextColor(onSecondary);
 
-        viewMarketChart.setCandles(buildDisplayCandles(market, livePrice));
+        setupPeriodChips(onColor, onSecondary);
+        List<CampusMarketRepository.MarketCandle> periodCandles = buildCandlesForPeriod(market, livePrice);
+        viewMarketChart.setData(periodCandles, buildLabelsForPeriod(periodCandles.size()));
         renderTriggers(market.getTriggers(requireContext()), onColor);
 
-        textTradeHint.setText(getString(R.string.market_buy_hint, AppData.getForumLabel(requireContext(), selectedMarketKey)));
+        setupTradeModeChips();
         textTradePrice.setText(getString(R.string.market_trade_price_format, livePrice));
     }
 
@@ -305,54 +320,78 @@ public class MarketFragment extends Fragment implements RefreshablePage {
         CampusMarketRepository.SchoolMarket market = CampusMarketRepository.getMarket(selectedMarketKey);
         MarketPortfolioStore.PortfolioSnapshot snapshot = MarketPortfolioStore.getPortfolio(requireContext());
         int currentCash = snapshot.getCashBalance();
-        MarketPortfolioStore.PositionSnapshot selectedPosition = findPosition(snapshot.getPositions(), selectedMarketKey);
-        int requestedSpend = parsePositiveInt(inputTradeAmount.getText().toString());
+        int units = parsePositiveInt(inputTradeAmount.getText().toString());
 
-        if (requestedSpend <= 0) {
+        if (units <= 0) {
             textTradeEstimate.setText(R.string.market_estimate_placeholder);
             setTradeButtonStates(false, false);
             return;
         }
 
         int unitPrice = getLivePrice(market);
-        int filledUnits = requestedSpend / unitPrice;
-        if (filledUnits <= 0) {
-            textTradeEstimate.setText(R.string.market_transaction_low_amount);
-            setTradeButtonStates(false, false);
+        int totalCost = units * unitPrice;
+
+        if ("short".equals(tradeMode)) {
+            // 做空: Open = open short, Close = close short
+            MarketPortfolioStore.ShortPositionSnapshot shortPos =
+                    findShortPosition(snapshot.getShortPositions(), selectedMarketKey);
+            boolean canOpenShort = totalCost <= currentCash;
+            boolean canCloseShort = shortPos != null && units <= shortPos.getUnits();
+
+            if (canOpenShort || canCloseShort) {
+                if (canOpenShort) {
+                    textTradeEstimate.setText(getString(
+                            R.string.market_estimate_open, totalCost, units, unitPrice));
+                } else {
+                    // close short estimate
+                    int pnl = (shortPos.getEntryPrice() - unitPrice) * units;
+                    int receive = units * shortPos.getEntryPrice(); // margin returned
+                    textTradeEstimate.setText(getString(
+                            R.string.market_estimate_close, receive, formatSignedTokens(pnl)));
+                }
+            } else {
+                textTradeEstimate.setText(R.string.market_transaction_insufficient_balance);
+            }
+            setTradeButtonStates(canOpenShort, canCloseShort);
             return;
         }
 
-        int unfilled = requestedSpend - (filledUnits * unitPrice);
-        boolean canBuy = requestedSpend <= currentCash;
-        boolean canSell = selectedPosition != null && requestedSpend <= selectedPosition.getCurrentValue();
+        // 做多: Open = buy, Close = sell
+        MarketPortfolioStore.PositionSnapshot longPos =
+                findPosition(snapshot.getPositions(), selectedMarketKey);
+        boolean canBuy = totalCost <= currentCash;
+        boolean canSell = longPos != null && units <= longPos.getUnits();
 
         if (canBuy || canSell) {
-            textTradeEstimate.setText(getString(
-                    R.string.market_estimate_format,
-                    requestedSpend,
-                    filledUnits,
-                    unitPrice,
-                    unfilled
-            ));
-        } else if (selectedPosition == null || selectedPosition.getUnits() <= 0) {
-            textTradeEstimate.setText(R.string.market_transaction_insufficient_balance);
+            if (canBuy) {
+                textTradeEstimate.setText(getString(
+                        R.string.market_estimate_open, totalCost, units, unitPrice));
+            } else {
+                // close long estimate
+                int pnl = (unitPrice - longPos.getAverageCost()) * units;
+                int receive = units * unitPrice;
+                textTradeEstimate.setText(getString(
+                        R.string.market_estimate_close, receive, formatSignedTokens(pnl)));
+            }
         } else {
-            textTradeEstimate.setText(R.string.market_transaction_insufficient_trade_capacity);
+            textTradeEstimate.setText(R.string.market_transaction_insufficient_balance);
         }
 
         setTradeButtonStates(canBuy, canSell);
     }
 
     private void handleBuy() {
+        // Buy / Open: in 做多 mode → open long; in 做空 mode → open short
         CampusMarketRepository.SchoolMarket market = CampusMarketRepository.getMarket(selectedMarketKey);
-        int requestedSpend = parsePositiveInt(inputTradeAmount.getText().toString());
+        int units = parsePositiveInt(inputTradeAmount.getText().toString());
         int unitPrice = getLivePrice(market);
-        MarketPortfolioStore.TradeResult result = MarketPortfolioStore.buy(
-                requireContext(),
-                selectedMarketKey,
-                requestedSpend,
-                unitPrice
-        );
+
+        MarketPortfolioStore.TradeResult result;
+        if ("short".equals(tradeMode)) {
+            result = MarketPortfolioStore.openShortUnits(requireContext(), selectedMarketKey, units, unitPrice);
+        } else {
+            result = MarketPortfolioStore.buyUnits(requireContext(), selectedMarketKey, units, unitPrice);
+        }
 
         if (result.getStatus() == MarketPortfolioStore.TradeResult.STATUS_SUCCESS) {
             lastTradeMessage = getString(
@@ -373,8 +412,8 @@ public class MarketFragment extends Fragment implements RefreshablePage {
 
         if (result.getStatus() == MarketPortfolioStore.TradeResult.STATUS_INSUFFICIENT_BALANCE) {
             lastTradeMessage = getString(R.string.market_transaction_insufficient_balance);
-        } else if (result.getStatus() == MarketPortfolioStore.TradeResult.STATUS_BELOW_UNIT_PRICE) {
-            lastTradeMessage = getString(R.string.market_transaction_low_amount);
+        } else if (result.getStatus() == MarketPortfolioStore.TradeResult.STATUS_INVALID_AMOUNT) {
+            lastTradeMessage = getString(R.string.market_transaction_invalid_amount);
         } else {
             lastTradeMessage = getString(R.string.market_transaction_invalid_amount);
         }
@@ -383,15 +422,17 @@ public class MarketFragment extends Fragment implements RefreshablePage {
     }
 
     private void handleSell() {
+        // Sell / Close: in 做多 mode → close long; in 做空 mode → close short
         CampusMarketRepository.SchoolMarket market = CampusMarketRepository.getMarket(selectedMarketKey);
-        int requestedValue = parsePositiveInt(inputTradeAmount.getText().toString());
+        int units = parsePositiveInt(inputTradeAmount.getText().toString());
         int unitPrice = getLivePrice(market);
-        MarketPortfolioStore.TradeResult result = MarketPortfolioStore.sell(
-                requireContext(),
-                selectedMarketKey,
-                requestedValue,
-                unitPrice
-        );
+
+        MarketPortfolioStore.TradeResult result;
+        if ("short".equals(tradeMode)) {
+            result = MarketPortfolioStore.closeShortUnits(requireContext(), selectedMarketKey, units, unitPrice);
+        } else {
+            result = MarketPortfolioStore.sellUnits(requireContext(), selectedMarketKey, units, unitPrice);
+        }
 
         if (result.getStatus() == MarketPortfolioStore.TradeResult.STATUS_SUCCESS) {
             lastTradeMessage = getString(
@@ -414,8 +455,10 @@ public class MarketFragment extends Fragment implements RefreshablePage {
             lastTradeMessage = getString(R.string.market_transaction_no_position);
         } else if (result.getStatus() == MarketPortfolioStore.TradeResult.STATUS_INSUFFICIENT_POSITION) {
             lastTradeMessage = getString(R.string.market_transaction_insufficient_position);
-        } else if (result.getStatus() == MarketPortfolioStore.TradeResult.STATUS_BELOW_UNIT_PRICE) {
-            lastTradeMessage = getString(R.string.market_transaction_low_amount);
+        } else if (result.getStatus() == MarketPortfolioStore.TradeResult.STATUS_NO_SHORT_POSITION) {
+            lastTradeMessage = getString(R.string.market_transaction_no_short_position);
+        } else if (result.getStatus() == MarketPortfolioStore.TradeResult.STATUS_INSUFFICIENT_SHORT_POSITION) {
+            lastTradeMessage = getString(R.string.market_transaction_insufficient_short_position);
         } else {
             lastTradeMessage = getString(R.string.market_transaction_invalid_amount);
         }
@@ -440,9 +483,12 @@ public class MarketFragment extends Fragment implements RefreshablePage {
         textTradeResult.setTextColor(ContextCompat.getColor(requireContext(), colorRes));
     }
 
-    private void renderPositions(List<MarketPortfolioStore.PositionSnapshot> positions) {
+    private void renderPositions(MarketPortfolioStore.PortfolioSnapshot snapshot) {
+        List<MarketPortfolioStore.PositionSnapshot> positions = snapshot.getPositions();
+        List<MarketPortfolioStore.ShortPositionSnapshot> shorts = snapshot.getShortPositions();
         layoutMarketPositions.removeAllViews();
-        textPositionEmpty.setVisibility(positions.isEmpty() ? View.VISIBLE : View.GONE);
+        boolean noPositions = positions.isEmpty() && shorts.isEmpty();
+        textPositionEmpty.setVisibility(noPositions ? View.VISIBLE : View.GONE);
 
         LayoutInflater inflater = LayoutInflater.from(requireContext());
         for (MarketPortfolioStore.PositionSnapshot position : positions) {
@@ -456,22 +502,81 @@ public class MarketFragment extends Fragment implements RefreshablePage {
 
             avatar.setImageResource(AppData.getForumAvatarResId(position.getForumKey()));
             avatar.setImageTintList(null);
-            forum.setText(AppData.getForumLabel(requireContext(), position.getForumKey()));
-            meta.setText(getString(
-                    R.string.market_position_meta,
-                    position.getUnits(),
-                    position.getAverageCost()
-            ));
-            value.setText(getString(
-                    R.string.market_position_value,
-                    position.getCurrentValue(),
-                    position.getCurrentPrice()
-            ));
+            forum.setText(getString(R.string.market_position_type_long) + " · "
+                    + AppData.getForumLabel(requireContext(), position.getForumKey()));
+            meta.setText(getString(R.string.market_position_meta, position.getUnits(), position.getAverageCost()));
+            value.setText(getString(R.string.market_position_value, position.getCurrentValue(), position.getCurrentPrice()));
             units.setText(getString(R.string.market_position_units, position.getUnits()));
             pnl.setText(getString(R.string.market_position_pnl, formatSignedTokens(position.getOpenPnl())));
             pnl.setTextColor(resolvePnlColor(position.getOpenPnl()));
             layoutMarketPositions.addView(item);
         }
+
+        for (MarketPortfolioStore.ShortPositionSnapshot sp : shorts) {
+            View item = inflater.inflate(R.layout.item_market_position, layoutMarketPositions, false);
+            ImageView avatar = item.findViewById(R.id.imagePositionAvatar);
+            TextView forum = item.findViewById(R.id.textPositionForum);
+            TextView meta = item.findViewById(R.id.textPositionMeta);
+            TextView value = item.findViewById(R.id.textPositionValue);
+            TextView units = item.findViewById(R.id.textPositionUnits);
+            TextView pnl = item.findViewById(R.id.textPositionPnl);
+
+            avatar.setImageResource(AppData.getForumAvatarResId(sp.getForumKey()));
+            avatar.setImageTintList(null);
+            forum.setText(getString(R.string.market_position_type_short) + " · "
+                    + AppData.getForumLabel(requireContext(), sp.getForumKey()));
+            meta.setText(getString(R.string.market_position_short_meta, sp.getUnits(), sp.getEntryPrice()));
+            value.setText(getString(R.string.market_position_value, sp.getCurrentValue(), sp.getCurrentPrice()));
+            units.setText(getString(R.string.market_position_units, sp.getUnits()));
+            pnl.setText(getString(R.string.market_position_pnl, formatSignedTokens(sp.getOpenPnl())));
+            pnl.setTextColor(resolvePnlColor(sp.getOpenPnl()));
+            layoutMarketPositions.addView(item);
+        }
+    }
+
+
+    private void setupTradeModeChips() {
+        if (layoutTradeMode == null) return;
+        layoutTradeMode.removeAllViews();
+        String[] modes = {"long", "short"};
+        int[] labelRes = {R.string.market_trade_long, R.string.market_trade_short};
+        int[] colors = {
+                ContextCompat.getColor(requireContext(), R.color.accent_strong),
+                ContextCompat.getColor(requireContext(), R.color.market_loss)
+        };
+        for (int i = 0; i < modes.length; i++) {
+            final String mode = modes[i];
+            boolean sel = mode.equals(tradeMode);
+            TextView chip = new TextView(requireContext());
+            chip.setText(labelRes[i]);
+            chip.setTextSize(14f);
+            chip.setTypeface(Typeface.DEFAULT_BOLD);
+            chip.setTextColor(sel ? ContextCompat.getColor(requireContext(), R.color.white) : colors[i]);
+            GradientDrawable bg = new GradientDrawable();
+            bg.setShape(GradientDrawable.RECTANGLE);
+            bg.setCornerRadius(dp(999));
+            bg.setColor(sel ? colors[i] : Color.TRANSPARENT);
+            bg.setStroke(dp(1), colors[i]);
+            chip.setBackground(bg);
+            chip.setPadding(dp(20), dp(8), dp(20), dp(8));
+            chip.setOnClickListener(v -> {
+                tradeMode = mode;
+                setupTradeModeChips();
+                updateTradeModeButtons();
+                updateTradeEstimate();
+            });
+            LinearLayout.LayoutParams p = new LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+            p.leftMargin = i == 0 ? 0 : dp(10);
+            layoutTradeMode.addView(chip, p);
+        }
+        updateTradeModeButtons();
+    }
+
+    private void updateTradeModeButtons() {
+        if (buttonTradeBuy == null || buttonTradeSell == null) return;
+        // Labels are always 买入开仓 / 卖出平仓; just refresh estimate on mode change
+        updateTradeEstimate();
     }
 
     private void setTradeButtonStates(boolean buyEnabled, boolean sellEnabled) {
@@ -583,6 +688,178 @@ public class MarketFragment extends Fragment implements RefreshablePage {
         } catch (NumberFormatException exception) {
             return 0;
         }
+    }
+
+    private void setupPeriodChips(int onColor, int onSecondary) {
+        if (layoutChartPeriod == null) return;
+        layoutChartPeriod.removeAllViews();
+        String[] periods = {"intraday", "day", "week", "month"};
+        int[] labelRes = {
+            R.string.chart_period_intraday,
+            R.string.chart_period_day,
+            R.string.chart_period_week,
+            R.string.chart_period_month
+        };
+        for (int i = 0; i < periods.length; i++) {
+            final String period = periods[i];
+            boolean sel = period.equals(selectedPeriod);
+            TextView chip = new TextView(requireContext());
+            chip.setText(labelRes[i]);
+            chip.setTextSize(13f);
+            chip.setTypeface(sel ? Typeface.DEFAULT_BOLD : Typeface.DEFAULT);
+            chip.setTextColor(sel ? onColor : Color.argb(160,
+                    Color.red(onColor), Color.green(onColor), Color.blue(onColor)));
+            chip.setBackground(makePill(Color.argb(sel ? 90 : 34, 255, 255, 255), 999));
+            chip.setPadding(dp(12), dp(6), dp(12), dp(6));
+            chip.setOnClickListener(v -> {
+                selectedPeriod = period;
+                CampusMarketRepository.SchoolMarket m = CampusMarketRepository.getMarket(selectedMarketKey);
+                List<CampusMarketRepository.MarketCandle> c = buildCandlesForPeriod(m, getLivePrice(m));
+                viewMarketChart.setData(c, buildLabelsForPeriod(c.size()));
+                int oc = ContextCompat.getColor(requireContext(), R.color.forum_header_on);
+                int os = ContextCompat.getColor(requireContext(), R.color.forum_header_on_secondary);
+                setupPeriodChips(oc, os);
+            });
+            LinearLayout.LayoutParams p = new LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+            p.leftMargin = i == 0 ? 0 : dp(8);
+            layoutChartPeriod.addView(chip, p);
+        }
+    }
+
+    private List<CampusMarketRepository.MarketCandle> buildCandlesForPeriod(
+            CampusMarketRepository.SchoolMarket market, int livePrice) {
+        long seed = Math.abs((long) market.getForumKey().hashCode());
+        Random rng = new Random(seed);
+        switch (selectedPeriod) {
+            case "intraday": {
+                List<CampusMarketRepository.MarketCandle> daily = market.getCandles();
+                int base = daily.size() >= 2 ? daily.get(daily.size() - 2).close : livePrice;
+                List<CampusMarketRepository.MarketCandle> result = new ArrayList<>();
+                int prev = base;
+                for (int i = 0; i < 20; i++) {
+                    if (i == 19) {
+                        int open = prev;
+                        int swing = Math.max(1, (int)(Math.abs(livePrice - open) * 0.3) + (int)(open * 0.002));
+                        result.add(new CampusMarketRepository.MarketCandle(
+                                open,
+                                Math.max(open, livePrice) + swing,
+                                Math.min(open, livePrice) - swing,
+                                livePrice));
+                    } else {
+                        int maxMove = Math.max(1, (int)(prev * 0.012));
+                        int delta = (int)(rng.nextDouble() * maxMove * 2) - (int)(maxMove * 0.9);
+                        int close = Math.max(prev / 2, prev + delta);
+                        int swing = Math.max(1, (int)(Math.abs(delta) * 0.4) + (int)(prev * 0.003));
+                        result.add(new CampusMarketRepository.MarketCandle(
+                                prev,
+                                Math.max(prev, close) + rng.nextInt(swing + 1),
+                                Math.min(prev, close) - rng.nextInt(swing + 1),
+                                close));
+                        prev = close;
+                    }
+                }
+                return result;
+            }
+            case "week": {
+                int base = (int)(market.getCandles().get(0).open * 0.78);
+                List<CampusMarketRepository.MarketCandle> result = new ArrayList<>();
+                int prev = base;
+                for (int i = 0; i < 12; i++) {
+                    int maxMove = Math.max(1, (int)(prev * 0.055));
+                    int delta = (int)(rng.nextDouble() * maxMove * 2) - (int)(maxMove * 0.65);
+                    int close = (i == 11) ? livePrice : Math.max(prev / 2, prev + delta);
+                    int swing = Math.max(2, (int)(Math.abs(close - prev) * 0.6) + (int)(prev * 0.014));
+                    result.add(new CampusMarketRepository.MarketCandle(
+                            prev,
+                            Math.max(prev, close) + swing,
+                            Math.min(prev, close) - swing,
+                            close));
+                    prev = close;
+                }
+                return result;
+            }
+            case "month": {
+                int base = (int)(market.getCandles().get(0).open * 0.52);
+                List<CampusMarketRepository.MarketCandle> result = new ArrayList<>();
+                int prev = base;
+                for (int i = 0; i < 18; i++) {
+                    int maxMove = Math.max(1, (int)(prev * 0.1));
+                    int delta = (int)(rng.nextDouble() * maxMove * 2) - (int)(maxMove * 0.55);
+                    int close = (i == 17) ? livePrice : Math.max(prev / 2, prev + delta);
+                    int swing = Math.max(3, (int)(Math.abs(close - prev) * 0.7) + (int)(prev * 0.022));
+                    result.add(new CampusMarketRepository.MarketCandle(
+                            prev,
+                            Math.max(prev, close) + swing,
+                            Math.min(prev, close) - swing,
+                            close));
+                    prev = close;
+                }
+                return result;
+            }
+            default:
+                return buildDisplayCandles(market, livePrice);
+        }
+    }
+
+    private List<String> buildLabelsForPeriod(int candleCount) {
+        Calendar cal = Calendar.getInstance();
+        boolean isChinese = "zh-CN".equals(UiPreferences.getLanguageTag(requireContext()));
+        List<String> labels = new ArrayList<>();
+        switch (selectedPeriod) {
+            case "intraday": {
+                // Last candle = current system time; go back ~30min per candle
+                int nowMinutes = cal.get(Calendar.HOUR_OF_DAY) * 60 + cal.get(Calendar.MINUTE);
+                int stepMinutes = 30;
+                for (int i = 0; i < candleCount; i++) {
+                    int offset = (candleCount - 1 - i) * stepMinutes;
+                    int totalMin = nowMinutes - offset;
+                    if (totalMin < 0) totalMin += 24 * 60;
+                    labels.add(String.format(Locale.US, "%d:%02d", totalMin / 60, totalMin % 60));
+                }
+                break;
+            }
+            case "week": {
+                // Weekly: show Monday dates going back
+                for (int i = candleCount - 1; i >= 0; i--) {
+                    Calendar c = Calendar.getInstance();
+                    c.add(Calendar.WEEK_OF_YEAR, -i);
+                    labels.add(0, String.format(Locale.US, "%d/%d", c.get(Calendar.MONTH) + 1, c.get(Calendar.DAY_OF_MONTH)));
+                }
+                break;
+            }
+            case "month": {
+                // Monthly: each candle is ~2 weeks
+                for (int i = candleCount - 1; i >= 0; i--) {
+                    Calendar c = Calendar.getInstance();
+                    c.add(Calendar.WEEK_OF_YEAR, -i * 2);
+                    String label = isChinese
+                            ? (c.get(Calendar.MONTH) + 1) + "月"
+                            : String.format(Locale.US, "%d/%d", c.get(Calendar.MONTH) + 1, c.get(Calendar.DAY_OF_MONTH));
+                    labels.add(0, label);
+                }
+                break;
+            }
+            default: { // "day"
+                // Daily: past candleCount days
+                for (int i = candleCount - 1; i >= 0; i--) {
+                    Calendar c = Calendar.getInstance();
+                    c.add(Calendar.DAY_OF_YEAR, -i);
+                    labels.add(0, String.format(Locale.US, "%d/%d", c.get(Calendar.MONTH) + 1, c.get(Calendar.DAY_OF_MONTH)));
+                }
+                break;
+            }
+        }
+        return labels;
+    }
+
+    @Nullable
+    private MarketPortfolioStore.ShortPositionSnapshot findShortPosition(
+            List<MarketPortfolioStore.ShortPositionSnapshot> shorts, String forumKey) {
+        for (MarketPortfolioStore.ShortPositionSnapshot s : shorts) {
+            if (s.getForumKey().equals(forumKey)) return s;
+        }
+        return null;
     }
 
     private int dp(int value) {

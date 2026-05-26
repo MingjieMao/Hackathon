@@ -79,7 +79,8 @@
                     android:paddingBottom="8dp"
                     android:textAppearance="?attr/textAppearanceTitleSmall"
                     android:textColor="@color/nav_active"
-                    android:textStyle="bold" />
+                    android:textStyle="bold"
+                    android:visibility="gone" />
             </LinearLayout>
 
             <LinearLayout
@@ -135,64 +136,92 @@
             </LinearLayout>
         </LinearLayout>
 
-        <LinearLayout
-            android:id="@+id/layoutSearchAssistant"
+        <HorizontalScrollView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
-            android:background="@drawable/bg_ai_answer"
-            android:orientation="vertical"
-            android:padding="14dp"
-            android:saveEnabled="false"
-            android:visibility="gone">
+            android:overScrollMode="never"
+            android:scrollbars="none">
 
-            <TextView
-                android:id="@+id/textSearchAssistantTitle"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/search_ai_answer_title"
-                android:textAppearance="?attr/textAppearanceTitleSmall"
-                android:textColor="@color/ink_primary"
-                android:textStyle="bold" />
+            <RadioGroup
+                android:id="@+id/radioChannelCategories"
+                android:layout_width="wrap_content"
+                android:layout_height="42dp"
+                android:orientation="horizontal" />
+        </HorizontalScrollView>
 
-            <TextView
-                android:id="@+id/textSearchAssistantBody"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="6dp"
-                android:lineSpacingExtra="2dp"
-                android:textAppearance="?attr/textAppearanceBodyMedium"
-                android:textColor="@color/ink_secondary" />
-        </LinearLayout>
-
-        <TextView
-            android:id="@+id/textFeedEmptyTitle"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
-            android:textAppearance="?attr/textAppearanceTitleLarge"
-            android:textColor="@color/ink_primary"
-            android:textStyle="bold"
-            android:visibility="gone" />
-
-        <TextView
-            android:id="@+id/textFeedEmptyBody"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:textAppearance="?attr/textAppearanceBodyLarge"
-            android:textColor="@color/ink_secondary"
-            android:visibility="gone" />
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/recyclerPosts"
+        <androidx.core.widget.NestedScrollView
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_marginTop="14dp"
             android:layout_weight="1"
             android:background="@color/page_background"
-            android:clipToPadding="false"
-            android:paddingBottom="72dp" />
+            android:fillViewport="true">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingBottom="80dp">
+
+                <LinearLayout
+                    android:id="@+id/layoutSearchAssistant"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:background="@drawable/bg_ai_answer"
+                    android:orientation="vertical"
+                    android:padding="14dp"
+                    android:saveEnabled="false"
+                    android:visibility="gone">
+
+                    <TextView
+                        android:id="@+id/textSearchAssistantTitle"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/search_ai_answer_title"
+                        android:textAppearance="?attr/textAppearanceTitleSmall"
+                        android:textColor="@color/ink_primary"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/textSearchAssistantBody"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="6dp"
+                        android:lineSpacingExtra="2dp"
+                        android:textAppearance="?attr/textAppearanceBodyMedium"
+                        android:textColor="@color/ink_secondary" />
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/textFeedEmptyTitle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="24dp"
+                    android:textAppearance="?attr/textAppearanceTitleLarge"
+                    android:textColor="@color/ink_primary"
+                    android:textStyle="bold"
+                    android:visibility="gone" />
+
+                <TextView
+                    android:id="@+id/textFeedEmptyBody"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:textAppearance="?attr/textAppearanceBodyLarge"
+                    android:textColor="@color/ink_secondary"
+                    android:visibility="gone" />
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/recyclerPosts"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="14dp"
+                    android:background="@color/page_background"
+                    android:clipToPadding="false"
+                    android:nestedScrollingEnabled="false" />
+            </LinearLayout>
+        </androidx.core.widget.NestedScrollView>
     </LinearLayout>
 
     <ImageButton

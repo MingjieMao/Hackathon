@@ -3,7 +3,19 @@
     android:height="24dp"
     android:viewportWidth="24"
     android:viewportHeight="24">
-    <path
-        android:fillColor="#FF000000"
-        android:pathData="M4,17h2v3H4zM8,11h2v9H8zM12,14h2v6h-2zM16,7h2v13h-2zM20,4h2v16h-2z" />
+    <group android:name="marketBar1" android:pivotX="5" android:pivotY="20">
+        <path android:fillColor="#FF000000" android:pathData="M4,17h2v3H4z" />
+    </group>
+    <group android:name="marketBar2" android:pivotX="9" android:pivotY="20">
+        <path android:fillColor="#FF000000" android:pathData="M8,11h2v9H8z" />
+    </group>
+    <group android:name="marketBar3" android:pivotX="13" android:pivotY="20">
+        <path android:fillColor="#FF000000" android:pathData="M12,14h2v6h-2z" />
+    </group>
+    <group android:name="marketBar4" android:pivotX="17" android:pivotY="20">
+        <path android:fillColor="#FF000000" android:pathData="M16,7h2v13h-2z" />
+    </group>
+    <group android:name="marketBar5" android:pivotX="21" android:pivotY="20">
+        <path android:fillColor="#FF000000" android:pathData="M20,4h2v16h-2z" />
+    </group>
 </vector>

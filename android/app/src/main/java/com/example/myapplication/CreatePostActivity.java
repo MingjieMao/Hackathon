@@ -1,13 +1,18 @@
 package com.example.myapplication;
 
-import android.net.Uri;
 import android.graphics.drawable.GradientDrawable;
+import android.net.Uri;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.widget.Button;
+import android.view.Gravity;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -20,15 +25,26 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import com.google.android.material.button.MaterialButton;
+
 import java.io.IOException;
 import java.util.Locale;
 
+import dao.model.Post;
+import dao.model.User;
+
 public class CreatePostActivity extends AppCompatActivity {
+    public static final String EXTRA_EDIT_POST_ID = "edit_post_id";
+
     private EditText inputPostTitle;
     private EditText inputPostBody;
+    private EditText inputPostCustomCategory;
+    private RadioGroup radioPostCategory;
     private ImageView imagePostPreview;
-    private Button buttonPublishPost;
+    private MaterialButton buttonPublishPost;
     private Uri selectedPostImageUri;
+    private Post editingPost;
 
     private final ActivityResultLauncher<String> pickPostImageLauncher =
             registerForActivityResult(new ActivityResultContracts.GetContent(), uri -> {
@@ -65,16 +81,31 @@ public class CreatePostActivity extends AppCompatActivity {
         TextView textCreatePostAvatar = findViewById(R.id.textCreatePostAvatar);
         inputPostTitle = findViewById(R.id.inputPostTitle);
         inputPostBody = findViewById(R.id.inputPostBody);
+        inputPostCustomCategory = findViewById(R.id.inputPostCustomCategory);
+        radioPostCategory = findViewById(R.id.radioPostCategory);
         imagePostPreview = findViewById(R.id.imagePostPreview);
-        Button buttonAddPostImage = findViewById(R.id.buttonAddPostImage);
+        ImageButton buttonMentionFriend = findViewById(R.id.buttonMentionFriend);
+        ImageButton buttonAddPostImage = findViewById(R.id.buttonAddPostImage);
+        ImageButton buttonAddEmoji = findViewById(R.id.buttonAddEmoji);
         buttonPublishPost = findViewById(R.id.buttonPublishPost);
+        editingPost = AppData.getPostById(getIntent().getStringExtra(EXTRA_EDIT_POST_ID));
 
         String nickname = UiPreferences.getProfileNickname(this);
         textCreatePostAvatar.setText(getAvatarLetter(nickname));
         textCreatePostAvatar.setBackground(makeAvatarBackground());
 
+        styleCategoryChips();
+
         buttonCancelPost.setOnClickListener(v -> finish());
+        radioPostCategory.setOnCheckedChangeListener((group, checkedId) -> {
+            styleCategoryChips();
+            inputPostCustomCategory.setVisibility(checkedId == R.id.radioCategoryCustom
+                    ? android.view.View.VISIBLE
+                    : android.view.View.GONE);
+        });
+        buttonMentionFriend.setOnClickListener(v -> showMentionDialog());
         buttonAddPostImage.setOnClickListener(v -> pickPostImageLauncher.launch("image/*"));
+        buttonAddEmoji.setOnClickListener(v -> showEmojiPicker());
         buttonPublishPost.setOnClickListener(v -> publishPost());
         inputPostTitle.addTextChangedListener(new TextWatcher() {
             @Override
@@ -90,8 +121,124 @@ public class CreatePostActivity extends AppCompatActivity {
             public void afterTextChanged(Editable s) {
             }
         });
-        inputPostTitle.requestFocus();
+        if (editingPost != null) {
+            populateEditPost();
+        } else {
+            inputPostTitle.requestFocus();
+        }
         refreshPublishState();
+    }
+
+    private void populateEditPost() {
+        inputPostTitle.setText(AppData.getPostTitle(editingPost));
+        inputPostBody.setText(AppData.getPostBody(editingPost));
+        buttonPublishPost.setText(R.string.action_save);
+
+        String imageUri = AppData.getPostImageUri(editingPost);
+        if (imageUri != null && !imageUri.isEmpty()) {
+            selectedPostImageUri = Uri.parse(imageUri);
+            imagePostPreview.setImageURI(selectedPostImageUri);
+            imagePostPreview.setVisibility(android.view.View.VISIBLE);
+        }
+
+        selectCategory(AppData.getPostCategory(this, editingPost));
+    }
+
+    private void selectCategory(String category) {
+        String normalized = category == null ? "" : category.trim();
+        if (normalized.equals(getString(R.string.category_social))) {
+            radioPostCategory.check(R.id.radioCategorySocial);
+        } else if (normalized.equals(getString(R.string.category_finals))) {
+            radioPostCategory.check(R.id.radioCategoryFinals);
+        } else if (normalized.equals(getString(R.string.category_ai))) {
+            radioPostCategory.check(R.id.radioCategoryAi);
+        } else if (normalized.equals(getString(R.string.category_study)) || normalized.isEmpty()) {
+            radioPostCategory.check(R.id.radioCategoryStudy);
+        } else {
+            radioPostCategory.check(R.id.radioCategoryCustom);
+            inputPostCustomCategory.setText(normalized);
+            inputPostCustomCategory.setVisibility(android.view.View.VISIBLE);
+        }
+        styleCategoryChips();
+    }
+
+    private void styleCategoryChips() {
+        int checkedId = radioPostCategory.getCheckedRadioButtonId();
+        for (int i = 0; i < radioPostCategory.getChildCount(); i++) {
+            RadioButton btn = (RadioButton) radioPostCategory.getChildAt(i);
+            boolean selected = btn.getId() == checkedId;
+            btn.setButtonDrawable(null);
+            btn.setGravity(Gravity.CENTER);
+            btn.setMinWidth(dp(60));
+            btn.setPadding(dp(14), 0, dp(14), 0);
+            btn.setTextSize(14);
+            btn.setTypeface(selected ? android.graphics.Typeface.DEFAULT_BOLD : android.graphics.Typeface.DEFAULT);
+            btn.setTextColor(ContextCompat.getColor(this, selected ? R.color.ink_primary : R.color.ink_secondary));
+            GradientDrawable bg = new GradientDrawable();
+            bg.setShape(GradientDrawable.RECTANGLE);
+            bg.setCornerRadius(dp(999));
+            bg.setColor(ContextCompat.getColor(this, R.color.tab_bar_fill));
+            bg.setStroke(dp(1), ContextCompat.getColor(this,
+                    selected ? R.color.surface_border : R.color.tab_bar_stroke));
+            btn.setBackground(bg);
+        }
+    }
+
+    private void showEmojiPicker() {
+        String[] emojis = {
+            "😀", "😂", "😍", "🥰", "😎", "🤔", "😅", "🤣",
+            "😭", "😊", "👍", "❤️", "🔥", "✨", "🎉", "🎊",
+            "💯", "🙏", "👀", "💪", "🎵", "🌟", "🌈", "🍕",
+            "🎮", "📚", "💻", "🏆", "🎯", "🚀", "😴", "🥳",
+            "😤", "🤯", "👻", "🫡", "💬", "🌸", "🐱", "🐶"
+        };
+
+        LinearLayout grid = new LinearLayout(this);
+        grid.setOrientation(LinearLayout.VERTICAL);
+        grid.setPadding(dp(12), dp(8), dp(12), dp(8));
+
+        androidx.appcompat.app.AlertDialog[] dialogHolder = new androidx.appcompat.app.AlertDialog[1];
+
+        int perRow = 8;
+        for (int i = 0; i < emojis.length; i += perRow) {
+            LinearLayout row = new LinearLayout(this);
+            row.setOrientation(LinearLayout.HORIZONTAL);
+            for (int j = i; j < Math.min(i + perRow, emojis.length); j++) {
+                TextView ev = new TextView(this);
+                ev.setText(emojis[j]);
+                ev.setTextSize(22);
+                ev.setGravity(Gravity.CENTER);
+                LinearLayout.LayoutParams p = new LinearLayout.LayoutParams(dp(40), dp(44));
+                ev.setLayoutParams(p);
+                final String emoji = emojis[j];
+                ev.setOnClickListener(v -> {
+                    insertEmoji(emoji);
+                    if (dialogHolder[0] != null) dialogHolder[0].dismiss();
+                });
+                row.addView(ev);
+            }
+            grid.addView(row);
+        }
+
+        ScrollView sv = new ScrollView(this);
+        sv.addView(grid);
+
+        androidx.appcompat.app.AlertDialog dialog = new MaterialAlertDialogBuilder(this,
+                R.style.ThemeOverlay_App_MaterialAlertDialog)
+                .setView(sv)
+                .create();
+        dialogHolder[0] = dialog;
+        dialog.show();
+    }
+
+    private void insertEmoji(String emoji) {
+        EditText target = inputPostBody.hasFocus() ? inputPostBody : inputPostTitle;
+        int start = Math.max(target.getSelectionStart(), 0);
+        target.getText().insert(start, emoji);
+    }
+
+    private int dp(int value) {
+        return Math.round(value * getResources().getDisplayMetrics().density);
     }
 
     private void refreshPublishState() {
@@ -107,9 +254,48 @@ public class CreatePostActivity extends AppCompatActivity {
         }
 
         String imageUri = selectedPostImageUri == null ? null : selectedPostImageUri.toString();
-        AppData.createPost(title, inputPostBody.getText().toString().trim(), imageUri);
-        Toast.makeText(this, getString(R.string.toast_post_created), Toast.LENGTH_SHORT).show();
+        if (editingPost != null) {
+            AppData.updatePost(editingPost, title, inputPostBody.getText().toString().trim(),
+                    getSelectedCategory(), imageUri);
+            Toast.makeText(this, getString(R.string.toast_post_updated), Toast.LENGTH_SHORT).show();
+        } else {
+            AppData.createPost(title, inputPostBody.getText().toString().trim(), imageUri, getSelectedCategory());
+            Toast.makeText(this, getString(R.string.toast_post_created), Toast.LENGTH_SHORT).show();
+        }
         finish();
+    }
+
+    private String getSelectedCategory() {
+        if (radioPostCategory.getCheckedRadioButtonId() == R.id.radioCategoryCustom) {
+            String custom = inputPostCustomCategory.getText().toString().trim();
+            return custom.isEmpty() ? getString(R.string.category_study) : custom;
+        }
+        RadioButton checked = findViewById(radioPostCategory.getCheckedRadioButtonId());
+        return checked == null ? getString(R.string.category_study) : checked.getText().toString();
+    }
+
+    private void showMentionDialog() {
+        java.util.ArrayList<User> followed = AppData.getFollowedPeople();
+        if (followed.isEmpty()) {
+            Toast.makeText(this, R.string.toast_follow_someone_first, Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        String[] labels = new String[followed.size()];
+        for (int i = 0; i < followed.size(); i++) {
+            labels[i] = "@" + followed.get(i).username();
+        }
+        new com.google.android.material.dialog.MaterialAlertDialogBuilder(this, R.style.ThemeOverlay_App_MaterialAlertDialog)
+                .setTitle(R.string.action_mention_friend)
+                .setItems(labels, (dialog, which) -> insertMention(labels[which]))
+                .show();
+    }
+
+    private void insertMention(String mention) {
+        int start = Math.max(inputPostBody.getSelectionStart(), 0);
+        String prefix = start > 0 ? " " : "";
+        inputPostBody.getText().insert(start, prefix + mention + " ");
+        inputPostBody.requestFocus();
     }
 
     private GradientDrawable makeAvatarBackground() {

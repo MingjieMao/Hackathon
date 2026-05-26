@@ -80,7 +80,15 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
             textNotificationTime.setText(AppData.formatTimestamp(notification.timestamp()));
             textNotificationBody.setText(notification.body());
 
-            imageNotificationType.setImageResource(R.drawable.ic_comment_outline_24);
+            int iconRes = R.drawable.ic_comment_outline_24;
+            if (notification.type() == AppData.NotificationType.LIKE) {
+                iconRes = R.drawable.ic_vote_up_filled_24;
+            } else if (notification.type() == AppData.NotificationType.BOOKMARK) {
+                iconRes = R.drawable.ic_bookmark_filled_24;
+            } else if (notification.type() == AppData.NotificationType.MENTION) {
+                iconRes = R.drawable.ic_user_24;
+            }
+            imageNotificationType.setImageResource(iconRes);
             imageNotificationType.setColorFilter(ContextCompat.getColor(itemView.getContext(), R.color.ink_primary));
         }
     }

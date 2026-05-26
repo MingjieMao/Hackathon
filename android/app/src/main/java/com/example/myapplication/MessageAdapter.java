@@ -1,6 +1,5 @@
 package com.example.myapplication;
 
-import android.net.Uri;
 import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
 import android.view.LayoutInflater;
@@ -27,6 +26,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
     private OnMessageVoteListener onMessageVoteListener;
     private OnMessageReplyListener onMessageReplyListener;
     private OnReplyThreadToggleListener onReplyThreadToggleListener;
+    private OnUserClickListener onUserClickListener;
 
     public MessageAdapter(List<Message> messages) {
         this(messages, java.util.Collections.emptySet());
@@ -51,6 +51,10 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
 
     public void setOnReplyThreadToggleListener(OnReplyThreadToggleListener onReplyThreadToggleListener) {
         this.onReplyThreadToggleListener = onReplyThreadToggleListener;
+    }
+
+    public void setOnUserClickListener(OnUserClickListener onUserClickListener) {
+        this.onUserClickListener = onUserClickListener;
     }
 
     @NonNull
@@ -80,6 +84,8 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
                 onMessageActionListener.onPrimaryAction(message);
             }
         });
+        holder.textMessageAvatar.setOnClickListener(v -> openUser(message.poster()));
+        holder.textMessageAuthor.setOnClickListener(v -> openUser(message.poster()));
         holder.textMessageReplyToggle.setOnClickListener(v -> {
             if (onReplyThreadToggleListener != null && topLevelId != null) {
                 onReplyThreadToggleListener.onToggle(topLevelId);
@@ -124,6 +130,16 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
 
     public interface OnReplyThreadToggleListener {
         void onToggle(UUID topLevelCommentId);
+    }
+
+    public interface OnUserClickListener {
+        void onUserClick(UUID userId);
+    }
+
+    private void openUser(UUID userId) {
+        if (onUserClickListener != null) {
+            onUserClickListener.onUserClick(userId);
+        }
     }
 
     private void vote(ViewHolder holder, Message message, int direction) {

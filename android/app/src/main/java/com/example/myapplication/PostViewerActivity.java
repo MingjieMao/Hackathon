@@ -1,5 +1,6 @@
 package com.example.myapplication;
 
+import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.GradientDrawable;
@@ -39,6 +40,7 @@ import java.util.UUID;
 
 import dao.model.Message;
 import dao.model.Post;
+import dao.model.User;
 
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
@@ -46,6 +48,7 @@ public class PostViewerActivity extends AppCompatActivity {
     public static final String EXTRA_POST_ID = "post_id";
 
     private TextView textPostViewerMode;
+    private TextView textPostViewerAuthorAvatar;
     private TextView textPostViewerForum;
     private TextView textPostViewerMeta;
     private TextView textPostViewerTitle;
@@ -53,15 +56,18 @@ public class PostViewerActivity extends AppCompatActivity {
     private TextView textPostViewerState;
     private TextView textPostViewerScore;
     private TextView textPostViewerCommentsCount;
+    private TextView textPostViewerBookmarkCount;
     private TextView textCommentsEmpty;
-    private ImageView imagePostViewerCommunityAvatar;
     private ImageView imagePostViewerAttachment;
     private ImageButton buttonPostUpvote;
     private ImageButton buttonPostDownvote;
+    private ImageView imagePostBookmarkIcon;
+    private LinearLayout buttonPostBookmark;
     private LinearLayout buttonPostComments;
     private LinearLayout layoutPostViewerHeaderCard;
     private Button buttonBack;
     private ImageButton buttonPostMenu;
+    private ImageButton buttonPostEdit;
     private NestedScrollView postViewerScroll;
     private RecyclerView recyclerMessages;
     private Post post;
@@ -124,6 +130,7 @@ public class PostViewerActivity extends AppCompatActivity {
         });
 
         textPostViewerMode = findViewById(R.id.textPostViewerMode);
+        textPostViewerAuthorAvatar = findViewById(R.id.textPostViewerAuthorAvatar);
         textPostViewerForum = findViewById(R.id.textPostViewerForum);
         textPostViewerMeta = findViewById(R.id.textPostViewerMeta);
         textPostViewerTitle = findViewById(R.id.textPostViewerTitle);
@@ -131,15 +138,18 @@ public class PostViewerActivity extends AppCompatActivity {
         textPostViewerState = findViewById(R.id.textPostViewerState);
         textPostViewerScore = findViewById(R.id.textPostViewerScore);
         textPostViewerCommentsCount = findViewById(R.id.textPostViewerCommentsCount);
+        textPostViewerBookmarkCount = findViewById(R.id.textPostViewerBookmarkCount);
         textCommentsEmpty = findViewById(R.id.textCommentsEmpty);
-        imagePostViewerCommunityAvatar = findViewById(R.id.imagePostViewerCommunityAvatar);
         imagePostViewerAttachment = findViewById(R.id.imagePostViewerAttachment);
         buttonPostComments = findViewById(R.id.textPostViewerComments);
         layoutPostViewerHeaderCard = findViewById(R.id.layoutPostViewerHeaderCard);
         buttonPostUpvote = findViewById(R.id.buttonPostUpvote);
         buttonPostDownvote = findViewById(R.id.buttonPostDownvote);
+        buttonPostBookmark = findViewById(R.id.buttonPostBookmark);
+        imagePostBookmarkIcon = findViewById(R.id.imagePostBookmarkIcon);
         buttonBack = findViewById(R.id.buttonBack);
         buttonPostMenu = findViewById(R.id.buttonPostMenu);
+        buttonPostEdit = findViewById(R.id.buttonPostEdit);
         postViewerScroll = findViewById(R.id.postViewerScroll);
         recyclerMessages = findViewById(R.id.recyclerMessages);
 
@@ -165,7 +175,18 @@ public class PostViewerActivity extends AppCompatActivity {
                 handleMessageAction(rootMessage);
             }
         });
+        buttonPostEdit.setOnClickListener(v -> openPostEditor());
         buttonPostComments.setOnClickListener(v -> showReplyDialog(rootMessage));
+        textPostViewerMeta.setOnClickListener(v -> openUserProfile(post == null ? null : post.poster));
+        textPostViewerAuthorAvatar.setOnClickListener(v -> openUserProfile(post == null ? null : post.poster));
+        textPostViewerAuthorAvatar.setClickable(true);
+        textPostViewerAuthorAvatar.setFocusable(true);
+        buttonPostBookmark.setOnClickListener(v -> {
+            if (AppData.togglePostBookmark(post)) {
+                refreshUi();
+                animateVote(imagePostBookmarkIcon);
+            }
+        });
     }
 
     @Override
@@ -182,21 +203,28 @@ public class PostViewerActivity extends AppCompatActivity {
             textPostViewerTitle.setText("");
             textPostViewerBody.setText(R.string.post_not_found_summary);
             textPostViewerState.setVisibility(View.GONE);
+            buttonPostEdit.setVisibility(View.GONE);
             textCommentsEmpty.setVisibility(View.VISIBLE);
             recyclerMessages.setAdapter(new MessageAdapter(new ArrayList<>()));
             return;
         }
 
         rootMessage = AppData.getRootMessage(post);
+        buttonPostEdit.setVisibility(AppData.getCurrentUserId() != null
+                && AppData.getCurrentUserId().equals(post.poster) ? View.VISIBLE : View.GONE);
         textPostViewerMode.setText(AppData.getCurrentModeLabel(this));
         textPostViewerForum.setText(AppData.getPostCommunityLabel(this, post));
-        imagePostViewerCommunityAvatar.setImageResource(AppData.getPostCommunityAvatarResId(post));
+        GradientDrawable authorAvatarBg = new GradientDrawable();
+        authorAvatarBg.setShape(GradientDrawable.OVAL);
+        authorAvatarBg.setColor(AppData.getAvatarColor(this, post.poster));
+        textPostViewerAuthorAvatar.setBackground(authorAvatarBg);
+        textPostViewerAuthorAvatar.setText(AppData.getAvatarLetter(post.poster));
         textPostViewerMeta.setText(getString(
                 R.string.message_author_line,
                 AppData.getDisplayName(this, post.poster),
                 AppData.getPostTimestampLabel(post)
         ));
-        textPostViewerTitle.setText(post.topic);
+        textPostViewerTitle.setText(AppData.getPostTitle(post));
         textPostViewerBody.setText(AppData.getPostBody(post));
         applyHeaderTheme();
         String postImageUri = AppData.getPostImageUri(post);
@@ -212,6 +240,7 @@ public class PostViewerActivity extends AppCompatActivity {
             imagePostViewerAttachment.setVisibility(View.VISIBLE);
         }
         textPostViewerCommentsCount.setText(AppData.getPostReplyCountLabel(this, post));
+        textPostViewerBookmarkCount.setText(AppData.getPostBookmarkCountLabel(this, post));
         textPostViewerScore.setText(String.valueOf(AppData.getPostVoteScore(post)));
         updatePostVoteColors();
 
@@ -237,8 +266,27 @@ public class PostViewerActivity extends AppCompatActivity {
             }
             refreshUi();
         });
+        adapter.setOnUserClickListener(this::openUserProfile);
         recyclerMessages.setAdapter(adapter);
         scrollToPendingReply(messages);
+    }
+
+    private void openUserProfile(UUID userId) {
+        if (userId == null) {
+            return;
+        }
+        Intent intent = new Intent(this, UserProfileActivity.class);
+        intent.putExtra(UserProfileActivity.EXTRA_USER_ID, userId.toString());
+        startActivity(intent);
+    }
+
+    private void openPostEditor() {
+        if (post == null) {
+            return;
+        }
+        Intent intent = new Intent(this, CreatePostActivity.class);
+        intent.putExtra(CreatePostActivity.EXTRA_EDIT_POST_ID, post.id.toString());
+        startActivity(intent);
     }
 
     private void updatePostVoteColors() {
@@ -255,6 +303,13 @@ public class PostViewerActivity extends AppCompatActivity {
         buttonPostDownvote.setImageResource(voteDirection < 0
                 ? R.drawable.ic_vote_down_filled_24
                 : R.drawable.ic_vote_down_outline_24);
+        boolean bookmarked = AppData.hasBookmarkedPost(post);
+        imagePostBookmarkIcon.setImageResource(bookmarked
+                ? R.drawable.ic_bookmark_filled_24
+                : R.drawable.ic_bookmark_24);
+        imagePostBookmarkIcon.setColorFilter(bookmarked
+                ? ContextCompat.getColor(this, R.color.rank_gold)
+                : ContextCompat.getColor(this, R.color.ink_primary));
         boolean activeAction = AppData.isAdminMode() ? AppData.isHidden(rootMessage) : AppData.hasCurrentUserReported(rootMessage);
         if (AppData.isAdminMode()) {
             buttonPostMenu.setImageResource(R.drawable.ic_hidden_24);
@@ -399,9 +454,17 @@ public class PostViewerActivity extends AppCompatActivity {
         toolsParams.topMargin = dp(8);
         dialogContent.addView(toolsRow, toolsParams);
 
+        ImageButton buttonAddEmoji = createReplyToolButton(R.drawable.ic_emoji_24, R.string.action_add_emoji);
+        buttonAddEmoji.setOnClickListener(v -> showReplyEmojiPicker(input));
+        toolsRow.addView(buttonAddEmoji);
+
         ImageButton buttonAttachImage = createReplyToolButton(R.drawable.ic_image_24, R.string.action_add_image);
         buttonAttachImage.setOnClickListener(v -> pickReplyImageLauncher.launch("image/*"));
         toolsRow.addView(buttonAttachImage);
+
+        ImageButton buttonMentionFriend = createReplyToolButton(R.drawable.ic_at_24, R.string.action_mention_friend);
+        buttonMentionFriend.setOnClickListener(v -> showMentionDialog(input));
+        toolsRow.addView(buttonMentionFriend);
 
         Space toolsSpacer = new Space(this);
         toolsRow.addView(toolsSpacer, new LinearLayout.LayoutParams(0, 1, 1));
@@ -452,10 +515,6 @@ public class PostViewerActivity extends AppCompatActivity {
             activeReplySendButton = null;
             selectedReplyImageUri = null;
         });
-        dialog.setOnDismissListener(unused -> {
-            activeReplyImagePreview = null;
-            selectedReplyImageUri = null;
-        });
         dialog.show();
         if (dialog.getWindow() != null) {
             dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
@@ -474,6 +533,73 @@ public class PostViewerActivity extends AppCompatActivity {
         params.setMarginEnd(dp(8));
         button.setLayoutParams(params);
         return button;
+    }
+
+    private void showMentionDialog(EditText input) {
+        ArrayList<User> followed = AppData.getFollowedPeople();
+        if (followed.isEmpty()) {
+            Toast.makeText(this, R.string.toast_follow_someone_first, Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        String[] labels = new String[followed.size()];
+        for (int i = 0; i < followed.size(); i++) {
+            labels[i] = "@" + followed.get(i).username();
+        }
+        new MaterialAlertDialogBuilder(this, R.style.ThemeOverlay_App_MaterialAlertDialog)
+                .setTitle(R.string.action_mention_friend)
+                .setItems(labels, (dialog, which) -> insertMention(input, labels[which]))
+                .show();
+    }
+
+    private void insertMention(EditText input, String mention) {
+        int start = Math.max(input.getSelectionStart(), 0);
+        String prefix = start > 0 ? " " : "";
+        input.getText().insert(start, prefix + mention + " ");
+        input.requestFocus();
+    }
+
+    private void showReplyEmojiPicker(EditText target) {
+        String[] emojis = {
+            "😀", "😂", "😍", "🥰", "😎", "🤔", "😅", "🤣",
+            "😭", "😊", "👍", "❤️", "🔥", "✨", "🎉", "🎊",
+            "💯", "🙏", "👀", "💪", "🎵", "🌟", "🌈", "🍕",
+            "🎮", "📚", "💻", "🏆", "🎯", "🚀", "😴", "🥳",
+            "😤", "🤯", "👻", "🫡", "💬", "🌸", "🐱", "🐶"
+        };
+        LinearLayout grid = new LinearLayout(this);
+        grid.setOrientation(LinearLayout.VERTICAL);
+        grid.setPadding(dp(12), dp(8), dp(12), dp(8));
+        androidx.appcompat.app.AlertDialog[] dialogHolder = new androidx.appcompat.app.AlertDialog[1];
+        int perRow = 8;
+        for (int i = 0; i < emojis.length; i += perRow) {
+            LinearLayout row = new LinearLayout(this);
+            row.setOrientation(LinearLayout.HORIZONTAL);
+            for (int j = i; j < Math.min(i + perRow, emojis.length); j++) {
+                TextView ev = new TextView(this);
+                ev.setText(emojis[j]);
+                ev.setTextSize(22);
+                ev.setGravity(android.view.Gravity.CENTER);
+                LinearLayout.LayoutParams p = new LinearLayout.LayoutParams(dp(40), dp(44));
+                ev.setLayoutParams(p);
+                final String emoji = emojis[j];
+                ev.setOnClickListener(v -> {
+                    int start = Math.max(target.getSelectionStart(), 0);
+                    target.getText().insert(start, emoji);
+                    if (dialogHolder[0] != null) dialogHolder[0].dismiss();
+                });
+                row.addView(ev);
+            }
+            grid.addView(row);
+        }
+        android.widget.ScrollView sv = new android.widget.ScrollView(this);
+        sv.addView(grid);
+        androidx.appcompat.app.AlertDialog dialog = new MaterialAlertDialogBuilder(this,
+                R.style.ThemeOverlay_App_MaterialAlertDialog)
+                .setView(sv)
+                .create();
+        dialogHolder[0] = dialog;
+        dialog.show();
     }
 
     private void updateReplySendState(TextView buttonSend, EditText input) {

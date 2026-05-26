@@ -2,8 +2,10 @@ package com.example.myapplication;
 
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
+import android.graphics.drawable.Animatable;
 import android.content.res.ColorStateList;
 import android.content.Intent;
+import android.net.Uri;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
@@ -26,6 +28,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
@@ -74,6 +78,8 @@ public class MainActivity extends AppCompatActivity {
     private LinearLayout buttonDrawerForumUnsw;
     private LinearLayout buttonDrawerForumUsyd;
     private LinearLayout buttonDrawerForumUm;
+    private LinearLayout layoutDrawerForumList;
+    private LinearLayout buttonDrawerAddForum;
     private ImageView imageDrawerForumAnu;
     private ImageView imageDrawerForumUnsw;
     private ImageView imageDrawerForumUsyd;
@@ -84,11 +90,28 @@ public class MainActivity extends AppCompatActivity {
     private TextView textDrawerForumUm;
     private boolean pageTransitionRunning;
 
+    private final ActivityResultLauncher<String> pickAvatarImageLauncher =
+            registerForActivityResult(new ActivityResultContracts.GetContent(), uri -> {
+                if (uri == null) return;
+                try {
+                    Uri local = ImageStorage.copyToLocalImage(this, uri);
+                    UiPreferences.setAvatarImageUri(this, local.toString());
+                    notifyPagesChanged();
+                } catch (java.io.IOException ignored) {
+                    Toast.makeText(this, getString(R.string.toast_action_failed), Toast.LENGTH_SHORT).show();
+                }
+            });
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         SplashScreen.installSplashScreen(this);
         UiPreferences.applyAppearance(this);
         super.onCreate(savedInstanceState);
+        if (!UiPreferences.isLoggedIn(this)) {
+            startActivity(new Intent(this, LoginActivity.class));
+            finish();
+            return;
+        }
         EdgeToEdge.enable(this);
         getWindow().setNavigationBarColor(Color.TRANSPARENT);
         getWindow().setStatusBarColor(Color.TRANSPARENT);
@@ -99,6 +122,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         AppData.ensurePopulated();
+        AppData.setAdminMode(UiPreferences.isAdminSession(this));
 
         drawerRoot = findViewById(R.id.drawerRoot);
         mainContent = findViewById(R.id.mainContent);
@@ -127,6 +151,8 @@ public class MainActivity extends AppCompatActivity {
         buttonDrawerForumUnsw = findViewById(R.id.buttonDrawerForumUnsw);
         buttonDrawerForumUsyd = findViewById(R.id.buttonDrawerForumUsyd);
         buttonDrawerForumUm = findViewById(R.id.buttonDrawerForumUm);
+        layoutDrawerForumList = findViewById(R.id.layoutDrawerForumList);
+        buttonDrawerAddForum = findViewById(R.id.buttonDrawerAddForum);
         imageDrawerForumAnu = findViewById(R.id.imageDrawerForumAnu);
         imageDrawerForumUnsw = findViewById(R.id.imageDrawerForumUnsw);
         imageDrawerForumUsyd = findViewById(R.id.imageDrawerForumUsyd);
@@ -143,6 +169,7 @@ public class MainActivity extends AppCompatActivity {
         buttonDrawerForumUnsw.setOnClickListener(v -> switchForum(AppData.FORUM_UNSW));
         buttonDrawerForumUsyd.setOnClickListener(v -> switchForum(AppData.FORUM_USYD));
         buttonDrawerForumUm.setOnClickListener(v -> switchForum(AppData.FORUM_UM));
+        buttonDrawerAddForum.setOnClickListener(v -> showAddForumDialog());
 
         configurePager();
         configureTabBar();
@@ -156,6 +183,12 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        if (!UiPreferences.isLoggedIn(this)) {
+            startActivity(new Intent(this, LoginActivity.class));
+            finish();
+            return;
+        }
+        AppData.setAdminMode(UiPreferences.isAdminSession(this));
         refreshDrawerUi();
         notifyPagesChanged();
     }
@@ -193,6 +226,15 @@ public class MainActivity extends AppCompatActivity {
         notifyPagesChanged();
     }
 
+    public void signOutToLogin() {
+        UiPreferences.clearLoginSession(this);
+        AppData.setAdminMode(false);
+        Intent intent = new Intent(this, LoginActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+        finish();
+    }
+
     public void switchForum(String forumKey) {
         AppData.setSelectedForum(forumKey);
         refreshDrawerUi();
@@ -212,7 +254,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void showAvatarPicker() {
-        String[] labels = getResources().getStringArray(R.array.avatar_option_labels);
         int selected = UiPreferences.getAvatarIndex(this);
 
         LinearLayout content = new LinearLayout(this);
@@ -236,47 +277,77 @@ public class MainActivity extends AppCompatActivity {
                 .setView(content)
                 .create();
 
-        for (int i = 0; i < UiPreferences.getGoogleColorCount(); i++) {
-            int index = i;
+        LinearLayout uploadRow = new LinearLayout(this);
+        uploadRow.setGravity(android.view.Gravity.CENTER_VERTICAL);
+        uploadRow.setOrientation(LinearLayout.HORIZONTAL);
+        uploadRow.setPadding(dp(8), dp(10), dp(8), dp(10));
+        uploadRow.setClickable(true);
+        uploadRow.setFocusable(true);
+        ImageView cameraIcon = new ImageView(this);
+        GradientDrawable cameraCircle = new GradientDrawable();
+        cameraCircle.setShape(GradientDrawable.OVAL);
+        cameraCircle.setColor(ContextCompat.getColor(this, R.color.tab_bar_fill));
+        cameraIcon.setBackground(cameraCircle);
+        cameraIcon.setImageResource(R.drawable.ic_image_24);
+        cameraIcon.setColorFilter(ContextCompat.getColor(this, R.color.ink_primary));
+        cameraIcon.setPadding(dp(7), dp(7), dp(7), dp(7));
+        cameraIcon.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
+        uploadRow.addView(cameraIcon, new LinearLayout.LayoutParams(dp(34), dp(34)));
+        TextView uploadLabel = new TextView(this);
+        uploadLabel.setText(R.string.action_upload_photo);
+        uploadLabel.setTextColor(ContextCompat.getColor(this, R.color.ink_primary));
+        uploadLabel.setTextSize(16);
+        LinearLayout.LayoutParams uploadLabelParams = new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1);
+        uploadLabelParams.setMarginStart(dp(12));
+        uploadRow.addView(uploadLabel, uploadLabelParams);
+        uploadRow.setOnClickListener(v -> {
+            dialog.dismiss();
+            pickAvatarImageLauncher.launch("image/*");
+        });
+        content.addView(uploadRow, new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
+
+        View divider = new View(this);
+        divider.setBackgroundColor(ContextCompat.getColor(this, R.color.surface_border));
+        LinearLayout.LayoutParams divParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, dp(1));
+        divParams.setMargins(dp(8), dp(4), dp(8), dp(4));
+        content.addView(divider, divParams);
+
+        int colorsPerRow = 6;
+        for (int i = 0; i < UiPreferences.getGoogleColorCount(); i += colorsPerRow) {
             LinearLayout row = new LinearLayout(this);
-            row.setGravity(android.view.Gravity.CENTER_VERTICAL);
+            row.setGravity(android.view.Gravity.CENTER);
             row.setOrientation(LinearLayout.HORIZONTAL);
-            row.setPadding(dp(8), dp(8), dp(8), dp(8));
-            row.setClickable(true);
-            row.setFocusable(true);
+            row.setPadding(0, dp(4), 0, dp(4));
 
-            TextView swatch = new TextView(this);
-            swatch.setGravity(android.view.Gravity.CENTER);
-            swatch.setText(index == selected ? "✓" : "");
-            swatch.setTextColor(ContextCompat.getColor(this, R.color.ink_primary));
-            swatch.setTypeface(Typeface.DEFAULT_BOLD);
-            GradientDrawable swatchBg = new GradientDrawable();
-            swatchBg.setShape(GradientDrawable.OVAL);
-            swatchBg.setColor(UiPreferences.getGoogleColor(index));
-            swatchBg.setStroke(dp(index == selected ? 3 : 1), ContextCompat.getColor(this,
-                    index == selected ? R.color.accent_strong : R.color.surface_border));
-            swatch.setBackground(swatchBg);
-            row.addView(swatch, new LinearLayout.LayoutParams(dp(34), dp(34)));
+            for (int j = i; j < Math.min(i + colorsPerRow, UiPreferences.getGoogleColorCount()); j++) {
+                int index = j;
+                TextView swatch = new TextView(this);
+                swatch.setGravity(android.view.Gravity.CENTER);
+                swatch.setText(index == selected ? "✓" : "");
+                swatch.setTextColor(ContextCompat.getColor(this, R.color.ink_primary));
+                swatch.setTypeface(Typeface.DEFAULT_BOLD);
+                swatch.setTextSize(16);
+                swatch.setClickable(true);
+                swatch.setFocusable(true);
+                GradientDrawable swatchBg = new GradientDrawable();
+                swatchBg.setShape(GradientDrawable.OVAL);
+                swatchBg.setColor(UiPreferences.getGoogleColor(index));
+                swatchBg.setStroke(dp(index == selected ? 3 : 1), ContextCompat.getColor(this,
+                        index == selected ? R.color.accent_strong : R.color.surface_border));
+                swatch.setBackground(swatchBg);
+                swatch.setOnClickListener(v -> {
+                    UiPreferences.setAvatarIndex(this, index);
+                    UiPreferences.setAvatarImageUri(this, null);
+                    dialog.dismiss();
+                    notifyPagesChanged();
+                    Toast.makeText(this, getString(R.string.toast_profile_saved), Toast.LENGTH_SHORT).show();
+                });
 
-            TextView label = new TextView(this);
-            label.setText(labels[index]);
-            label.setTextColor(ContextCompat.getColor(this, R.color.ink_primary));
-            label.setTextSize(16);
-            LinearLayout.LayoutParams labelParams = new LinearLayout.LayoutParams(
-                    0,
-                    LinearLayout.LayoutParams.WRAP_CONTENT,
-                    1
-            );
-            labelParams.setMarginStart(dp(12));
-            row.addView(label, labelParams);
-
-            row.setOnClickListener(v -> {
-                UiPreferences.setAvatarIndex(this, index);
-                dialog.dismiss();
-                notifyPagesChanged();
-                Toast.makeText(this, getString(R.string.toast_profile_saved), Toast.LENGTH_SHORT).show();
-            });
-
+                LinearLayout.LayoutParams swatchParams = new LinearLayout.LayoutParams(dp(38), dp(38));
+                swatchParams.setMargins(dp(5), dp(4), dp(5), dp(4));
+                row.addView(swatch, swatchParams);
+            }
             content.addView(row, new LinearLayout.LayoutParams(
                     LinearLayout.LayoutParams.MATCH_PARENT,
                     LinearLayout.LayoutParams.WRAP_CONTENT
@@ -562,6 +633,120 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    public void showAddForumDialog() {
+        LinearLayout content = new LinearLayout(this);
+        content.setOrientation(LinearLayout.VERTICAL);
+        content.setBackgroundResource(R.drawable.bg_avatar_picker_dialog);
+        content.setPadding(dp(20), dp(18), dp(20), dp(14));
+
+        TextView title = new TextView(this);
+        title.setText(getString(R.string.action_add_forum));
+        title.setTextColor(ContextCompat.getColor(this, R.color.ink_primary));
+        title.setTextSize(20);
+        title.setTypeface(Typeface.DEFAULT_BOLD);
+        LinearLayout.LayoutParams titleParams = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        titleParams.setMargins(0, 0, 0, dp(14));
+        content.addView(title, titleParams);
+
+        EditText input = new EditText(this);
+        input.setInputType(android.text.InputType.TYPE_CLASS_TEXT | android.text.InputType.TYPE_TEXT_FLAG_CAP_WORDS);
+        input.setHint(getString(R.string.forum_name_hint));
+        input.setTextColor(ContextCompat.getColor(this, R.color.ink_primary));
+        input.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(this, R.color.ink_primary)));
+        content.addView(input, new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
+
+        androidx.appcompat.app.AlertDialog dialog = new MaterialAlertDialogBuilder(this, R.style.ThemeOverlay_App_MaterialAlertDialog)
+                .setView(content)
+                .create();
+
+        LinearLayout buttonRow = new LinearLayout(this);
+        buttonRow.setOrientation(LinearLayout.HORIZONTAL);
+        buttonRow.setGravity(android.view.Gravity.END);
+        LinearLayout.LayoutParams rowParams = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        rowParams.setMargins(0, dp(16), 0, 0);
+
+        TextView cancelBtn = new TextView(this);
+        cancelBtn.setText(R.string.action_cancel);
+        cancelBtn.setTextColor(ContextCompat.getColor(this, R.color.ink_primary));
+        cancelBtn.setTextSize(14);
+        cancelBtn.setTypeface(Typeface.DEFAULT_BOLD);
+        cancelBtn.setPadding(dp(12), dp(8), dp(12), dp(8));
+        cancelBtn.setOnClickListener(v -> dialog.dismiss());
+
+        TextView addBtn = new TextView(this);
+        addBtn.setText(R.string.action_add_forum);
+        addBtn.setTextColor(ContextCompat.getColor(this, R.color.ink_primary));
+        addBtn.setTextSize(14);
+        addBtn.setTypeface(Typeface.DEFAULT_BOLD);
+        addBtn.setPadding(dp(12), dp(8), dp(4), dp(8));
+        addBtn.setOnClickListener(v -> {
+            String name = input.getText().toString().trim();
+            if (name.isEmpty()) {
+                input.setError(getString(R.string.forum_name_hint));
+                return;
+            }
+            AppData.addCustomForum(name);
+            addCustomForumToDrawer(name);
+            dialog.dismiss();
+        });
+
+        buttonRow.addView(cancelBtn);
+        buttonRow.addView(addBtn);
+        content.addView(buttonRow, rowParams);
+
+        dialog.show();
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
+        }
+    }
+
+    private void addCustomForumToDrawer(String label) {
+        String key = "custom_" + label.toLowerCase(java.util.Locale.getDefault()).replaceAll("[^a-z0-9]", "_");
+
+        LinearLayout button = new LinearLayout(this);
+        button.setOrientation(LinearLayout.HORIZONTAL);
+        button.setGravity(android.view.Gravity.CENTER_VERTICAL);
+        button.setClickable(true);
+        button.setFocusable(true);
+        button.setForeground(ContextCompat.getDrawable(this, android.R.attr.selectableItemBackground));
+        android.content.res.ColorStateList bgTint = android.content.res.ColorStateList.valueOf(
+                ContextCompat.getColor(this, R.color.surface));
+        button.setBackgroundTintList(bgTint);
+        button.setBackgroundResource(R.drawable.bg_mode_pill);
+        android.widget.LinearLayout.LayoutParams params = new android.widget.LinearLayout.LayoutParams(
+                android.widget.LinearLayout.LayoutParams.MATCH_PARENT, dp(56));
+        params.setMargins(0, dp(10), 0, 0);
+        button.setLayoutParams(params);
+
+        ImageView avatar = new ImageView(this);
+        android.widget.LinearLayout.LayoutParams avatarParams = new android.widget.LinearLayout.LayoutParams(dp(28), dp(28));
+        avatar.setLayoutParams(avatarParams);
+        avatar.setBackgroundResource(R.drawable.bg_community_avatar);
+        avatar.setImageResource(R.drawable.avatar_anu);
+        avatar.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
+        avatar.setPadding(dp(3), dp(3), dp(3), dp(3));
+        button.addView(avatar);
+
+        TextView labelView = new TextView(this);
+        android.widget.LinearLayout.LayoutParams labelParams = new android.widget.LinearLayout.LayoutParams(
+                android.widget.LinearLayout.LayoutParams.WRAP_CONTENT, android.widget.LinearLayout.LayoutParams.WRAP_CONTENT);
+        labelParams.setMarginStart(dp(12));
+        labelView.setLayoutParams(labelParams);
+        labelView.setText(label);
+        labelView.setTextColor(ContextCompat.getColor(this, R.color.ink_primary));
+        labelView.setTextAppearance(com.google.android.material.R.style.TextAppearance_Material3_TitleMedium);
+        labelView.setTypeface(Typeface.DEFAULT_BOLD);
+        button.addView(labelView);
+
+        button.setOnClickListener(v -> switchForum(key));
+
+        int addButtonIndex = layoutDrawerForumList.getChildCount() - 1;
+        layoutDrawerForumList.addView(button, addButtonIndex);
+    }
+
     private void configurePager() {
         viewPager.setAdapter(new MainPagerAdapter(this));
         viewPager.setOffscreenPageLimit(MainPagerAdapter.PAGE_COUNT);
@@ -703,32 +888,19 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void playMarketPulseHint() {
-        iconMarket.animate().cancel();
-        iconMarket.setScaleX(1f);
-        iconMarket.setScaleY(1f);
-        iconMarket.animate()
-                .scaleX(1.22f)
-                .scaleY(1.22f)
-                .setDuration(120L)
-                .withEndAction(() -> iconMarket.animate()
-                        .scaleX(1f)
-                        .scaleY(1f)
-                        .setDuration(240L)
-                        .setInterpolator(new PathInterpolator(0.22f, 1f, 0.36f, 1f))
-                        .start())
-                .start();
+        android.graphics.drawable.Drawable d = iconMarket.getDrawable();
+        if (d instanceof Animatable) {
+            ((Animatable) d).stop();
+            ((Animatable) d).start();
+        }
     }
 
     private void playLeaderboardLiftHint() {
-        iconLeaderboard.animate().cancel();
-        iconLeaderboard.setTranslationY(dp(10));
-        iconLeaderboard.setAlpha(0.45f);
-        iconLeaderboard.animate()
-                .translationY(0f)
-                .alpha(1f)
-                .setDuration(320L)
-                .setInterpolator(new PathInterpolator(0.22f, 1f, 0.36f, 1f))
-                .start();
+        android.graphics.drawable.Drawable d = iconLeaderboard.getDrawable();
+        if (d instanceof Animatable) {
+            ((Animatable) d).stop();
+            ((Animatable) d).start();
+        }
     }
 
     private void playTabHint(int page) {
@@ -916,6 +1088,11 @@ public class MainActivity extends AppCompatActivity {
         label.setText(AppData.getForumLabel(this, forumKey));
         label.setTextColor(ContextCompat.getColor(this, R.color.ink_primary));
         avatar.setImageResource(AppData.getForumAvatarResId(forumKey));
+        if (AppData.FORUM_UM.equals(forumKey)) {
+            avatar.setBackgroundResource(R.drawable.bg_community_avatar_um);
+        } else {
+            avatar.setBackgroundResource(R.drawable.bg_community_avatar);
+        }
         button.setBackgroundTintList(ColorStateList.valueOf(backgroundColor));
         button.setAlpha(selected ? 1.0f : 0.78f);
     }

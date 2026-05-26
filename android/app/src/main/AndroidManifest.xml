@@ -15,13 +15,23 @@
             android:name=".CreatePostActivity"
             android:exported="false" />
         <activity
+            android:name=".SettingsActivity"
+            android:exported="false" />
+        <activity
             android:name=".ModerationQueueActivity"
             android:exported="false" />
         <activity
             android:name=".PostViewerActivity"
             android:exported="false" />
         <activity
+            android:name=".UserProfileActivity"
+            android:exported="false" />
+        <activity
             android:name=".MainActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustNothing" />
+        <activity
+            android:name=".LoginActivity"
             android:exported="true"
             android:theme="@style/Theme.MyApplication.Launcher"
             android:windowSoftInputMode="adjustNothing">

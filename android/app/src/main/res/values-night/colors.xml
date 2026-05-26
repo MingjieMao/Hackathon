@@ -35,7 +35,7 @@
     <color name="avatar_sand">#8E8E93</color>
 
     <color name="tab_bar_fill">#2A2E36</color>
-    <color name="tab_bar_stroke">#2A2E36</color>
+    <color name="tab_bar_stroke">#454B58</color>
     <color name="tab_indicator_fill_top">#26FFFFFF</color>
     <color name="tab_indicator_fill_bottom">#26FFFFFF</color>
     <color name="tab_indicator_stroke">#32FFFFFF</color>

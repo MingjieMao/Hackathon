@@ -14,6 +14,9 @@ public final class UiPreferences {
     private static final String KEY_AVATAR_INDEX = "profile_avatar_index";
     private static final String KEY_LANGUAGE_TAG = "language_tag";
     private static final String KEY_DARK_THEME = "dark_theme";
+    private static final String KEY_LOGGED_IN = "logged_in";
+    private static final String KEY_SESSION_ADMIN = "session_admin";
+    private static final String KEY_AVATAR_IMAGE_URI = "avatar_image_uri";
 
     private static final String DEFAULT_UID = "uid_2100_001";
     private static final String DEFAULT_LANGUAGE_TAG = "en";
@@ -90,6 +93,36 @@ public final class UiPreferences {
 
     public static void setDarkTheme(Context context, boolean darkTheme) {
         prefs(context).edit().putBoolean(KEY_DARK_THEME, darkTheme).commit();
+    }
+
+    public static boolean isLoggedIn(Context context) {
+        return prefs(context).getBoolean(KEY_LOGGED_IN, false);
+    }
+
+    public static boolean isAdminSession(Context context) {
+        return prefs(context).getBoolean(KEY_SESSION_ADMIN, false);
+    }
+
+    public static void setLoginSession(Context context, boolean adminSession) {
+        prefs(context).edit()
+                .putBoolean(KEY_LOGGED_IN, true)
+                .putBoolean(KEY_SESSION_ADMIN, adminSession)
+                .commit();
+    }
+
+    public static String getAvatarImageUri(Context context) {
+        return prefs(context).getString(KEY_AVATAR_IMAGE_URI, null);
+    }
+
+    public static void setAvatarImageUri(Context context, String uri) {
+        prefs(context).edit().putString(KEY_AVATAR_IMAGE_URI, uri).apply();
+    }
+
+    public static void clearLoginSession(Context context) {
+        prefs(context).edit()
+                .putBoolean(KEY_LOGGED_IN, false)
+                .remove(KEY_SESSION_ADMIN)
+                .commit();
     }
 
     private static SharedPreferences prefs(Context context) {

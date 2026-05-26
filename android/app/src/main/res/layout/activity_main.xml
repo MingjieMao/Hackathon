@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.drawerlayout.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/drawerRoot"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -140,7 +141,7 @@
                         android:id="@+id/iconMarket"
                         android:layout_width="20dp"
                         android:layout_height="20dp"
-                        android:src="@drawable/ic_market_24" />
+                        android:src="@drawable/ic_market_animated" />
 
                     <TextView
                         android:id="@+id/labelMarket"
@@ -169,7 +170,7 @@
                         android:id="@+id/iconLeaderboard"
                         android:layout_width="20dp"
                         android:layout_height="20dp"
-                        android:src="@drawable/ic_leaderboard_24" />
+                        android:src="@drawable/ic_leaderboard_animated" />
 
                     <TextView
                         android:id="@+id/labelLeaderboard"
@@ -235,6 +236,7 @@
             android:textStyle="bold" />
 
         <LinearLayout
+            android:id="@+id/layoutDrawerForumList"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="22dp"
@@ -356,12 +358,34 @@
                     android:textAppearance="?attr/textAppearanceTitleMedium"
                     android:textStyle="bold" />
             </LinearLayout>
-        </LinearLayout>
 
-        <Space
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1" />
+            <LinearLayout
+                android:id="@+id/buttonDrawerAddForum"
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:layout_marginTop="10dp"
+                android:background="@drawable/bg_mode_pill"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground"
+                android:gravity="center"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:src="@drawable/ic_add_24"
+                    android:tint="@color/ink_secondary" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="10dp"
+                    android:text="@string/action_add_forum"
+                    android:textAppearance="?attr/textAppearanceTitleMedium"
+                    android:textColor="@color/ink_secondary" />
+            </LinearLayout>
+        </LinearLayout>
 
     </LinearLayout>
 

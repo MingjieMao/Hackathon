@@ -176,6 +176,15 @@ public final class CampusMarketRepository {
             return candles.get(candles.size() - 1).close;
         }
 
+        /**
+         * Heat Index = 100 + 2×posts + 1.5×replies + 0.8×netVotes + 5×activityMomentum
+         * activityMomentum = max(0, (posts + replies/5 - 30) / 10)
+         */
+        public int getHeatIndex() {
+            float momentum = Math.max(0f, (postsToday + repliesToday / 5f - 30f) / 10f);
+            return Math.round(100 + 2f * postsToday + 1.5f * repliesToday + 0.8f * likesToday + 5f * momentum);
+        }
+
         public double getDayChangePercent() {
             if (candles.size() < 2) {
                 return 0d;

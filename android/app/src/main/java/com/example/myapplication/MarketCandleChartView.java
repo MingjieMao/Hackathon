@@ -20,6 +20,7 @@ public class MarketCandleChartView extends View {
     private final Paint labelPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final RectF rect = new RectF();
     private final ArrayList<CampusMarketRepository.MarketCandle> candles = new ArrayList<>();
+    private final ArrayList<String> timeLabels = new ArrayList<>();
 
     public MarketCandleChartView(Context context) {
         this(context, null);
@@ -47,15 +48,20 @@ public class MarketCandleChartView extends View {
         lossPaint.setStrokeWidth(dp(2));
         lossPaint.setColor(ContextCompat.getColor(getContext(), R.color.market_loss));
 
-        labelPaint.setColor(ContextCompat.getColor(getContext(), R.color.ink_secondary));
-        labelPaint.setTextSize(dp(12));
+        labelPaint.setTextSize(dp(9));
+        labelPaint.setTextAlign(Paint.Align.CENTER);
+        labelPaint.setColor(ContextCompat.getColor(getContext(), R.color.chart_grid));
     }
 
     public void setCandles(List<CampusMarketRepository.MarketCandle> values) {
+        setData(values, null);
+    }
+
+    public void setData(List<CampusMarketRepository.MarketCandle> values, List<String> labels) {
         candles.clear();
-        if (values != null) {
-            candles.addAll(values);
-        }
+        if (values != null) candles.addAll(values);
+        timeLabels.clear();
+        if (labels != null) timeLabels.addAll(labels);
         invalidate();
     }
 
@@ -66,10 +72,11 @@ public class MarketCandleChartView extends View {
             return;
         }
 
+        boolean hasLabels = !timeLabels.isEmpty();
         float left = dp(10);
         float top = dp(12);
         float right = getWidth() - dp(10);
-        float bottom = getHeight() - dp(24);
+        float bottom = getHeight() - (hasLabels ? dp(28) : dp(24));
         float chartHeight = Math.max(dp(40), bottom - top);
 
         int max = Integer.MIN_VALUE;
@@ -83,7 +90,7 @@ public class MarketCandleChartView extends View {
             min -= 1;
         }
 
-        drawGrid(canvas, left, top, right, bottom, max, min);
+        drawGrid(canvas, left, top, right, bottom);
 
         float slotWidth = (right - left) / Math.max(1, candles.size());
         float bodyWidth = Math.min(dp(18), slotWidth * 0.52f);
@@ -108,17 +115,36 @@ public class MarketCandleChartView extends View {
             rect.set(centerX - (bodyWidth / 2f), bodyTop, centerX + (bodyWidth / 2f), bodyBottom);
             canvas.drawRoundRect(rect, dp(4), dp(4), paint);
         }
+
+        // Draw evenly-spaced time labels at the bottom
+        if (hasLabels && candles.size() > 1) {
+            int n = candles.size();
+            // Show up to 5 labels: first, ~25%, ~50%, ~75%, last
+            int[] positions;
+            if (n <= 5) {
+                positions = new int[n];
+                for (int i = 0; i < n; i++) positions[i] = i;
+            } else {
+                positions = new int[]{0, n / 4, n / 2, n * 3 / 4, n - 1};
+            }
+            float labelY = getHeight() - dp(4);
+            for (int idx : positions) {
+                if (idx < timeLabels.size()) {
+                    float cx = left + (slotWidth * idx) + (slotWidth / 2f);
+                    // clamp to avoid clipping at edges
+                    cx = Math.max(left + dp(16), Math.min(right - dp(16), cx));
+                    canvas.drawText(timeLabels.get(idx), cx, labelY, labelPaint);
+                }
+            }
+        }
     }
 
-    private void drawGrid(Canvas canvas, float left, float top, float right, float bottom, int max, int min) {
+    private void drawGrid(Canvas canvas, float left, float top, float right, float bottom) {
         float middle = top + ((bottom - top) / 2f);
         canvas.drawRoundRect(new RectF(left, top, right, bottom), dp(20), dp(20), gridPaint);
         canvas.drawLine(left + dp(12), top + dp(24), right - dp(12), top + dp(24), gridPaint);
         canvas.drawLine(left + dp(12), middle, right - dp(12), middle, gridPaint);
         canvas.drawLine(left + dp(12), bottom - dp(18), right - dp(12), bottom - dp(18), gridPaint);
-        canvas.drawText(String.valueOf(max), left + dp(16), top + dp(18), labelPaint);
-        canvas.drawText(String.valueOf(min), left + dp(16), bottom - dp(2), labelPaint);
-        canvas.drawText(String.valueOf(candles.get(candles.size() - 1).close), right - dp(44), top + dp(18), labelPaint);
     }
 
     private float valueToY(int value, int min, int max, float top, float chartHeight) {

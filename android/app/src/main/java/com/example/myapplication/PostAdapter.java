@@ -1,5 +1,6 @@
 package com.example.myapplication;
 
+import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,6 +15,7 @@ import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.List;
+import java.util.UUID;
 
 import dao.model.Post;
 
@@ -21,6 +23,8 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
     private final List<Post> posts;
     private OnClickListener onClickListener;
     private OnVoteClickListener onVoteClickListener;
+    private OnUserClickListener onUserClickListener;
+    private OnBookmarkClickListener onBookmarkClickListener;
 
     public PostAdapter(List<Post> posts) {
         this.posts = posts;
@@ -32,6 +36,14 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
 
     public void setOnVoteClickListener(OnVoteClickListener onVoteClickListener) {
         this.onVoteClickListener = onVoteClickListener;
+    }
+
+    public void setOnUserClickListener(OnUserClickListener onUserClickListener) {
+        this.onUserClickListener = onUserClickListener;
+    }
+
+    public void setOnBookmarkClickListener(OnBookmarkClickListener onBookmarkClickListener) {
+        this.onBookmarkClickListener = onBookmarkClickListener;
     }
 
     @NonNull
@@ -56,9 +68,11 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
         holder.itemView.setSelected(false);
         holder.itemView.setPressed(false);
         holder.itemView.setOnClickListener(v -> openPost(post));
+        holder.layoutPostCommunity.setOnClickListener(v -> openUser(post.poster));
         holder.buttonPostComments.setOnClickListener(v -> openPost(post));
         holder.buttonPostUpvote.setOnClickListener(v -> vote(holder, post, 1));
         holder.buttonPostDownvote.setOnClickListener(v -> vote(holder, post, -1));
+        holder.buttonPostBookmark.setOnClickListener(v -> bookmark(holder, post));
     }
 
     @Override
@@ -74,6 +88,14 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
         void onVote(Post post, int direction);
     }
 
+    public interface OnUserClickListener {
+        void onUserClick(UUID userId);
+    }
+
+    public interface OnBookmarkClickListener {
+        void onBookmark(Post post);
+    }
+
     private void openPost(Post post) {
         if (onClickListener != null) {
             onClickListener.onClick(post);
@@ -85,6 +107,20 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
             onVoteClickListener.onVote(post, direction);
             holder.display(post);
             animateVote(direction > 0 ? holder.buttonPostUpvote : holder.buttonPostDownvote);
+        }
+    }
+
+    private void bookmark(ViewHolder holder, Post post) {
+        if (onBookmarkClickListener != null) {
+            onBookmarkClickListener.onBookmark(post);
+            holder.display(post);
+            animateVote(holder.imagePostBookmarkIcon);
+        }
+    }
+
+    private void openUser(UUID userId) {
+        if (onUserClickListener != null) {
+            onUserClickListener.onUserClick(userId);
         }
     }
 
@@ -107,29 +143,39 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
     static class ViewHolder extends RecyclerView.ViewHolder {
         private final TextView textPostMeta;
         private final TextView textPostCommunity;
-        private final ImageView imagePostCommunityAvatar;
+        private final TextView textPostCategory;
+        private final TextView textPostPosterAvatar;
         private final TextView textPostTitle;
         private final TextView textPostBody;
         private final ImageView imagePostAttachment;
         private final TextView textPostScore;
         private final ImageButton buttonPostUpvote;
         private final ImageButton buttonPostDownvote;
+        private final LinearLayout buttonPostBookmark;
+        private final LinearLayout layoutPostCommunity;
         private final LinearLayout buttonPostComments;
         private final TextView textPostCommentsCount;
+        private final TextView textPostBookmarkCount;
+        private final ImageView imagePostBookmarkIcon;
 
         ViewHolder(View view) {
             super(view);
             textPostMeta = view.findViewById(R.id.textPostMeta);
             textPostCommunity = view.findViewById(R.id.textPostCommunity);
-            imagePostCommunityAvatar = view.findViewById(R.id.imagePostCommunityAvatar);
+            textPostCategory = view.findViewById(R.id.textPostCategory);
+            textPostPosterAvatar = view.findViewById(R.id.textPostPosterAvatar);
             textPostTitle = view.findViewById(R.id.textPostTitle);
             textPostBody = view.findViewById(R.id.textPostBody);
             imagePostAttachment = view.findViewById(R.id.imagePostAttachment);
             textPostScore = view.findViewById(R.id.textPostScore);
             buttonPostUpvote = view.findViewById(R.id.buttonPostUpvote);
             buttonPostDownvote = view.findViewById(R.id.buttonPostDownvote);
+            buttonPostBookmark = view.findViewById(R.id.buttonPostBookmark);
+            layoutPostCommunity = view.findViewById(R.id.layoutPostCommunity);
             buttonPostComments = view.findViewById(R.id.buttonPostComments);
             textPostCommentsCount = view.findViewById(R.id.textPostCommentsCount);
+            textPostBookmarkCount = view.findViewById(R.id.textPostBookmarkCount);
+            imagePostBookmarkIcon = view.findViewById(R.id.imagePostBookmarkIcon);
         }
 
         void display(Post post) {
@@ -139,8 +185,13 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
 
             textPostCommunity.setText(AppData.getPostCommunityLabel(itemView.getContext(), post));
             textPostMeta.setText(AppData.getPostFeedByline(itemView.getContext(), post));
-            imagePostCommunityAvatar.setImageResource(AppData.getPostCommunityAvatarResId(post));
-            textPostTitle.setText(post.topic);
+            textPostCategory.setText(AppData.getPostCategory(itemView.getContext(), post));
+            GradientDrawable avatarBg = new GradientDrawable();
+            avatarBg.setShape(GradientDrawable.OVAL);
+            avatarBg.setColor(AppData.getAvatarColor(itemView.getContext(), post.poster));
+            textPostPosterAvatar.setBackground(avatarBg);
+            textPostPosterAvatar.setText(AppData.getAvatarLetter(post.poster));
+            textPostTitle.setText(AppData.getPostTitle(post));
             textPostBody.setText(AppData.getPostBodyPreview(post));
             String imageUri = AppData.getPostImageUri(post);
             if (imageUri == null || imageUri.isEmpty()) {
@@ -156,6 +207,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
             }
             textPostScore.setText(String.valueOf(AppData.getPostVoteScore(post)));
             textPostCommentsCount.setText(AppData.getPostReplyCountLabel(itemView.getContext(), post));
+            textPostBookmarkCount.setText(AppData.getPostBookmarkCountLabel(itemView.getContext(), post));
 
             int voteDirection = AppData.getCurrentUserPostVote(post);
             buttonPostUpvote.setImageResource(voteDirection > 0
@@ -164,6 +216,13 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
             buttonPostDownvote.setImageResource(voteDirection < 0
                     ? R.drawable.ic_vote_down_filled_24
                     : R.drawable.ic_vote_down_outline_24);
+            boolean bookmarked = AppData.hasBookmarkedPost(post);
+            imagePostBookmarkIcon.setImageResource(bookmarked
+                    ? R.drawable.ic_bookmark_filled_24
+                    : R.drawable.ic_bookmark_24);
+            imagePostBookmarkIcon.setColorFilter(bookmarked
+                    ? ContextCompat.getColor(itemView.getContext(), R.color.rank_gold)
+                    : ContextCompat.getColor(itemView.getContext(), R.color.ink_primary));
             textPostScore.setTextColor(voteDirection > 0
                     ? upvoteColor
                     : voteDirection < 0 ? downvoteColor : ContextCompat.getColor(itemView.getContext(), R.color.ink_primary));

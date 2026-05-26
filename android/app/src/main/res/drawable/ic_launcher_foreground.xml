@@ -1,4 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<bitmap xmlns:android="http://schemas.android.com/apk/res/android"
-    android:gravity="center"
-    android:src="@drawable/ic_launcher_wordmark" />
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:bottom="48dp"
+        android:left="48dp"
+        android:right="48dp"
+        android:top="48dp">
+        <bitmap
+            android:gravity="center"
+            android:src="@drawable/ic_launcher_wordmark" />
+    </item>
+</layer-list>

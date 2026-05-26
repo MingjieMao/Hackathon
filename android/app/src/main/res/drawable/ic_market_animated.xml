@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<animated-vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:drawable="@drawable/ic_market_24">
+    <target android:name="marketBar1" android:animation="@animator/market_bar1_anim" />
+    <target android:name="marketBar2" android:animation="@animator/market_bar2_anim" />
+    <target android:name="marketBar3" android:animation="@animator/market_bar3_anim" />
+    <target android:name="marketBar4" android:animation="@animator/market_bar4_anim" />
+    <target android:name="marketBar5" android:animation="@animator/market_bar5_anim" />
+</animated-vector>

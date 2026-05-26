@@ -88,7 +88,7 @@ public class ReportedMessageAdapter extends RecyclerView.Adapter<ReportedMessage
 
         void display(Message message) {
             Post post = AppData.getPostForMessage(message);
-            textReportedThread.setText(post == null ? AppData.getThreadUnknownLabel(itemView.getContext()) : post.topic);
+            textReportedThread.setText(post == null ? AppData.getThreadUnknownLabel(itemView.getContext()) : AppData.getPostTitle(post));
             textReportedAuthor.setText(AppData.formatMessageAuthorLine(itemView.getContext(), message));
             textReportedContent.setText(message.message());
             textReportedMeta.setText(AppData.getReportedCardMeta(itemView.getContext(), message));

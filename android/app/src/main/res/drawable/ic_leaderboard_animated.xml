@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<animated-vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:drawable="@drawable/ic_leaderboard_24">
+    <target android:name="lbBar1" android:animation="@animator/lb_bar1_anim" />
+    <target android:name="lbBar2" android:animation="@animator/lb_bar2_anim" />
+    <target android:name="lbBar3" android:animation="@animator/lb_bar3_anim" />
+</animated-vector>

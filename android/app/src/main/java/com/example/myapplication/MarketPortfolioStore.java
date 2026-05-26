@@ -25,6 +25,8 @@ public final class MarketPortfolioStore {
     private static final String KEY_TRADE_COUNT_PREFIX = "trade_count_";
     private static final String KEY_LAST_LIVE_TICK_AT = "last_live_tick_at";
     private static final String KEY_LIVE_TICK_COUNT_PREFIX = "live_tick_count_";
+    private static final String KEY_SHORT_UNITS_PREFIX = "short_units_";
+    private static final String KEY_SHORT_COST_PREFIX = "short_cost_";
 
     private MarketPortfolioStore() {
     }
@@ -106,31 +108,108 @@ public final class MarketPortfolioStore {
 
         SharedPreferences prefs = prefs(context);
         ArrayList<PositionSnapshot> positions = new ArrayList<>();
+        ArrayList<ShortPositionSnapshot> shortPositions = new ArrayList<>();
         int marketValue = 0;
         int costBasis = 0;
+        int shortPnl = 0;
 
         for (String forumKey : AppData.getForumKeys()) {
             int units = prefs.getInt(KEY_POSITION_UNITS_PREFIX + forumKey, 0);
             int totalCost = prefs.getInt(KEY_POSITION_COST_PREFIX + forumKey, 0);
-            if (units <= 0 || totalCost <= 0) {
-                continue;
-            }
 
             CampusMarketRepository.SchoolMarket market = CampusMarketRepository.getMarket(forumKey);
             int currentPrice = getLivePrice(context, forumKey, market.getCurrentPrice());
-            int currentValue = units * currentPrice;
-            positions.add(new PositionSnapshot(forumKey, units, totalCost, currentPrice, currentValue));
-            marketValue += currentValue;
-            costBasis += totalCost;
+
+            if (units > 0 && totalCost > 0) {
+                int currentValue = units * currentPrice;
+                positions.add(new PositionSnapshot(forumKey, units, totalCost, currentPrice, currentValue));
+                marketValue += currentValue;
+                costBasis += totalCost;
+            }
+
+            int shortUnits = prefs.getInt(KEY_SHORT_UNITS_PREFIX + forumKey, 0);
+            int shortTotalCost = prefs.getInt(KEY_SHORT_COST_PREFIX + forumKey, 0);
+            if (shortUnits > 0 && shortTotalCost > 0) {
+                int entryPrice = Math.round((float) shortTotalCost / shortUnits);
+                int pnl = (entryPrice - currentPrice) * shortUnits;
+                shortPositions.add(new ShortPositionSnapshot(forumKey, shortUnits, entryPrice, currentPrice, pnl));
+                shortPnl += pnl;
+            }
         }
 
         positions.sort(Comparator.comparingInt(PositionSnapshot::getCurrentValue).reversed());
 
         int cashBalance = prefs.getInt(KEY_CASH_BALANCE, DAILY_FLOOR_TOKENS);
         int totalAssets = cashBalance + marketValue;
-        int openPnl = marketValue - costBasis;
+        int openPnl = marketValue - costBasis + shortPnl;
 
-        return new PortfolioSnapshot(cashBalance, marketValue, totalAssets, openPnl, positions);
+        return new PortfolioSnapshot(cashBalance, marketValue, totalAssets, openPnl, positions, shortPositions);
+    }
+
+    @NonNull
+    public static TradeResult openShort(Context context, String forumKey, int requestedSpend, int unitPrice) {
+        ensureDailyReset(context);
+        if (requestedSpend <= 0 || unitPrice <= 0) {
+            return new TradeResult(TradeResult.STATUS_INVALID_AMOUNT, requestedSpend, 0, 0, 0, getCashBalance(context), unitPrice, 0);
+        }
+        int cashBefore = getCashBalance(context);
+        if (requestedSpend > cashBefore) {
+            return new TradeResult(TradeResult.STATUS_INSUFFICIENT_BALANCE, requestedSpend, 0, 0, cashBefore, cashBefore, unitPrice, 0);
+        }
+        int filledUnits = requestedSpend / unitPrice;
+        if (filledUnits <= 0) {
+            return new TradeResult(TradeResult.STATUS_BELOW_UNIT_PRICE, requestedSpend, 0, 0, cashBefore, cashBefore, unitPrice, 0);
+        }
+        int actualCost = filledUnits * unitPrice;
+        int cashAfter = cashBefore - actualCost;
+        SharedPreferences prefs = prefs(context);
+        int oldShortUnits = prefs.getInt(KEY_SHORT_UNITS_PREFIX + forumKey, 0);
+        int oldShortCost = prefs.getInt(KEY_SHORT_COST_PREFIX + forumKey, 0);
+        prefs.edit()
+                .putInt(KEY_CASH_BALANCE, cashAfter)
+                .putInt(KEY_SHORT_UNITS_PREFIX + forumKey, oldShortUnits + filledUnits)
+                .putInt(KEY_SHORT_COST_PREFIX + forumKey, oldShortCost + actualCost)
+                .apply();
+        int priceAfterTrade = applyTradePulse(context, forumKey, unitPrice, filledUnits, requestedSpend, false);
+        return new TradeResult(TradeResult.STATUS_SUCCESS, requestedSpend, filledUnits, actualCost,
+                cashBefore, cashAfter, priceAfterTrade, priceAfterTrade - unitPrice);
+    }
+
+    @NonNull
+    public static TradeResult closeShort(Context context, String forumKey, int requestedValue, int unitPrice) {
+        ensureDailyReset(context);
+        if (requestedValue <= 0 || unitPrice <= 0) {
+            return new TradeResult(TradeResult.STATUS_INVALID_AMOUNT, requestedValue, 0, 0, getCashBalance(context), getCashBalance(context), unitPrice, 0);
+        }
+        SharedPreferences prefs = prefs(context);
+        int shortUnits = prefs.getInt(KEY_SHORT_UNITS_PREFIX + forumKey, 0);
+        int shortCost = prefs.getInt(KEY_SHORT_COST_PREFIX + forumKey, 0);
+        int cashBefore = getCashBalance(context);
+        if (shortUnits <= 0 || shortCost <= 0) {
+            return new TradeResult(TradeResult.STATUS_NO_SHORT_POSITION, requestedValue, 0, 0, cashBefore, cashBefore, unitPrice, 0);
+        }
+        int entryPrice = Math.round((float) shortCost / shortUnits);
+        int filledUnits = requestedValue / entryPrice;
+        if (filledUnits <= 0) {
+            return new TradeResult(TradeResult.STATUS_BELOW_UNIT_PRICE, requestedValue, 0, 0, cashBefore, cashBefore, unitPrice, 0);
+        }
+        if (filledUnits > shortUnits) {
+            return new TradeResult(TradeResult.STATUS_INSUFFICIENT_SHORT_POSITION, requestedValue, 0, 0, cashBefore, cashBefore, unitPrice, 0);
+        }
+        // Closing short: return margin + profit (margin = filledUnits × entryPrice; profit = (entry - current) × units)
+        int proceeds = Math.max(0, filledUnits * (2 * entryPrice - unitPrice));
+        int cashAfter = cashBefore + proceeds;
+        int remainingUnits = shortUnits - filledUnits;
+        int remainingCost = remainingUnits == 0 ? 0
+                : Math.round((float) shortCost * remainingUnits / shortUnits);
+        prefs.edit()
+                .putInt(KEY_CASH_BALANCE, cashAfter)
+                .putInt(KEY_SHORT_UNITS_PREFIX + forumKey, remainingUnits)
+                .putInt(KEY_SHORT_COST_PREFIX + forumKey, remainingCost)
+                .apply();
+        int priceAfterTrade = applyTradePulse(context, forumKey, unitPrice, filledUnits, requestedValue, true);
+        return new TradeResult(TradeResult.STATUS_SUCCESS, requestedValue, filledUnits, proceeds,
+                cashBefore, cashAfter, priceAfterTrade, priceAfterTrade - unitPrice);
     }
 
     @NonNull
@@ -230,6 +309,47 @@ public final class MarketPortfolioStore {
         );
     }
 
+    // ── Unit-based convenience wrappers ──────────────────────────────────────
+
+    /** Buy `units` of a long position at `unitPrice` each. */
+    public static TradeResult buyUnits(Context context, String forumKey, int units, int unitPrice) {
+        if (units <= 0) {
+            return new TradeResult(TradeResult.STATUS_INVALID_AMOUNT, 0, 0, 0, getCashBalance(context), getCashBalance(context), unitPrice, 0);
+        }
+        return buy(context, forumKey, units * unitPrice, unitPrice);
+    }
+
+    /** Close `units` of a long position at `unitPrice` each. */
+    public static TradeResult sellUnits(Context context, String forumKey, int units, int unitPrice) {
+        if (units <= 0) {
+            return new TradeResult(TradeResult.STATUS_INVALID_AMOUNT, 0, 0, 0, getCashBalance(context), getCashBalance(context), unitPrice, 0);
+        }
+        return sell(context, forumKey, units * unitPrice, unitPrice);
+    }
+
+    /** Open a short on `units` at `unitPrice` each (margin = units × unitPrice). */
+    public static TradeResult openShortUnits(Context context, String forumKey, int units, int unitPrice) {
+        if (units <= 0) {
+            return new TradeResult(TradeResult.STATUS_INVALID_AMOUNT, 0, 0, 0, getCashBalance(context), getCashBalance(context), unitPrice, 0);
+        }
+        return openShort(context, forumKey, units * unitPrice, unitPrice);
+    }
+
+    /** Close `units` of an existing short position. Entry price is derived from stored cost/units. */
+    public static TradeResult closeShortUnits(Context context, String forumKey, int units, int unitPrice) {
+        if (units <= 0) {
+            return new TradeResult(TradeResult.STATUS_INVALID_AMOUNT, 0, 0, 0, getCashBalance(context), getCashBalance(context), unitPrice, 0);
+        }
+        SharedPreferences prefs = prefs(context);
+        int shortUnits = prefs.getInt(KEY_SHORT_UNITS_PREFIX + forumKey, 0);
+        int shortCost = prefs.getInt(KEY_SHORT_COST_PREFIX + forumKey, 0);
+        int entryPrice = (shortUnits > 0) ? Math.round((float) shortCost / shortUnits) : unitPrice;
+        if (entryPrice <= 0) entryPrice = unitPrice;
+        return closeShort(context, forumKey, units * entryPrice, unitPrice);
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+
     private static SharedPreferences prefs(Context context) {
         return context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
     }
@@ -322,41 +442,61 @@ public final class MarketPortfolioStore {
         private final int totalAssets;
         private final int openPnl;
         private final ArrayList<PositionSnapshot> positions;
+        private final ArrayList<ShortPositionSnapshot> shortPositions;
 
         private PortfolioSnapshot(
                 int cashBalance,
                 int marketValue,
                 int totalAssets,
                 int openPnl,
-                ArrayList<PositionSnapshot> positions
+                ArrayList<PositionSnapshot> positions,
+                ArrayList<ShortPositionSnapshot> shortPositions
         ) {
             this.cashBalance = cashBalance;
             this.marketValue = marketValue;
             this.totalAssets = totalAssets;
             this.openPnl = openPnl;
             this.positions = positions;
+            this.shortPositions = shortPositions;
         }
 
-        public int getCashBalance() {
-            return cashBalance;
-        }
-
-        public int getMarketValue() {
-            return marketValue;
-        }
-
-        public int getTotalAssets() {
-            return totalAssets;
-        }
-
-        public int getOpenPnl() {
-            return openPnl;
-        }
+        public int getCashBalance() { return cashBalance; }
+        public int getMarketValue() { return marketValue; }
+        public int getTotalAssets() { return totalAssets; }
+        public int getOpenPnl() { return openPnl; }
 
         @NonNull
         public ArrayList<PositionSnapshot> getPositions() {
             return new ArrayList<>(positions);
         }
+
+        @NonNull
+        public ArrayList<ShortPositionSnapshot> getShortPositions() {
+            return new ArrayList<>(shortPositions);
+        }
+    }
+
+    public static final class ShortPositionSnapshot {
+        private final String forumKey;
+        private final int units;
+        private final int entryPrice;
+        private final int currentPrice;
+        private final int openPnl;
+
+        private ShortPositionSnapshot(String forumKey, int units, int entryPrice, int currentPrice, int openPnl) {
+            this.forumKey = forumKey;
+            this.units = units;
+            this.entryPrice = entryPrice;
+            this.currentPrice = currentPrice;
+            this.openPnl = openPnl;
+        }
+
+        public String getForumKey() { return forumKey; }
+        public int getUnits() { return units; }
+        public int getEntryPrice() { return entryPrice; }
+        public int getCurrentPrice() { return currentPrice; }
+        public int getOpenPnl() { return openPnl; }
+        public int getCurrentValue() { return units * entryPrice; }
     }
 
     public static final class PositionSnapshot {
@@ -410,6 +550,8 @@ public final class MarketPortfolioStore {
         public static final int STATUS_BELOW_UNIT_PRICE = 3;
         public static final int STATUS_NO_POSITION = 4;
         public static final int STATUS_INSUFFICIENT_POSITION = 5;
+        public static final int STATUS_NO_SHORT_POSITION = 6;
+        public static final int STATUS_INSUFFICIENT_SHORT_POSITION = 7;
 
         private final int status;
         private final int requestedSpend;

@@ -6,6 +6,7 @@ import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.view.Gravity;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.content.Context;
@@ -16,6 +17,8 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -26,7 +29,9 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
+import java.util.UUID;
 
+import dao.model.Message;
 import dao.model.Post;
 
 public class ChannelsFragment extends Fragment implements RefreshablePage {
@@ -40,12 +45,16 @@ public class ChannelsFragment extends Fragment implements RefreshablePage {
     private ImageView imageChannelSearchIcon;
     private LinearLayout layoutChannelSearch;
     private LinearLayout layoutSearchAssistant;
+    private TextView textSearchAssistantTitle;
+    private TextView textSearchAssistantBody;
     private EditText inputChannelSearch;
     private ImageButton buttonClearSearch;
     private ImageButton buttonChannelsDrawer;
     private RecyclerView recyclerPosts;
+    private RadioGroup radioChannelCategories;
     private String currentForumKey;
     private String searchQuery = "";
+    private String selectedCategory = "";
 
     @Nullable
     @Override
@@ -68,9 +77,12 @@ public class ChannelsFragment extends Fragment implements RefreshablePage {
         layoutChannelSearch = view.findViewById(R.id.layoutChannelSearch);
         layoutSearchAssistant = view.findViewById(R.id.layoutSearchAssistant);
         layoutSearchAssistant.setVisibility(View.GONE);
+        textSearchAssistantTitle = view.findViewById(R.id.textSearchAssistantTitle);
+        textSearchAssistantBody = view.findViewById(R.id.textSearchAssistantBody);
         inputChannelSearch = view.findViewById(R.id.inputChannelSearch);
         buttonClearSearch = view.findViewById(R.id.buttonClearSearch);
         recyclerPosts = view.findViewById(R.id.recyclerPosts);
+        radioChannelCategories = view.findViewById(R.id.radioChannelCategories);
         buttonChannelsDrawer = view.findViewById(R.id.buttonChannelsDrawer);
         ImageButton buttonCreatePost = view.findViewById(R.id.buttonCreatePost);
 
@@ -152,11 +164,17 @@ public class ChannelsFragment extends Fragment implements RefreshablePage {
         applyHeaderTheme(selectedForumKey);
         inputChannelSearch.setHint(getString(R.string.search_channel_hint, AppData.getSelectedForumLabel(requireContext())));
         buttonClearSearch.setVisibility(searchQuery.trim().isEmpty() ? View.GONE : View.VISIBLE);
+        refreshCategoryFilters();
 
         ArrayList<Post> posts = AppData.searchPosts(requireContext(), searchQuery);
+        if (!selectedCategory.isEmpty() && !selectedCategory.equals(getString(R.string.category_all))) {
+            posts.removeIf(post -> !selectedCategory.equals(AppData.getPostCategory(requireContext(), post)));
+        }
         PostAdapter adapter = new PostAdapter(posts);
         adapter.setOnClickListener(this::openPost);
         adapter.setOnVoteClickListener((post, direction) -> AppData.togglePostVote(post, direction));
+        adapter.setOnBookmarkClickListener(AppData::togglePostBookmark);
+        adapter.setOnUserClickListener(this::openUserProfile);
         recyclerPosts.setAdapter(adapter);
 
         boolean empty = posts.isEmpty();
@@ -170,6 +188,11 @@ public class ChannelsFragment extends Fragment implements RefreshablePage {
             textFeedEmptyTitle.setText(AppData.getFeedEmptyTitle(requireContext()));
             textFeedEmptyBody.setText(AppData.getFeedEmptyBody(requireContext()));
         }
+
+        if (!searchQuery.trim().isEmpty() && !empty && textSearchAssistantBody != null) {
+            textSearchAssistantBody.setText(buildAiSummary(posts, searchQuery.trim()));
+            layoutSearchAssistant.setVisibility(View.VISIBLE);
+        }
     }
 
     private void openPost(Post post) {
@@ -180,6 +203,77 @@ public class ChannelsFragment extends Fragment implements RefreshablePage {
         Intent intent = new Intent(requireContext(), PostViewerActivity.class);
         intent.putExtra(PostViewerActivity.EXTRA_POST_ID, post.id.toString());
         startActivity(intent);
+    }
+
+    private void openUserProfile(java.util.UUID userId) {
+        if (!isAdded() || userId == null) {
+            return;
+        }
+        Intent intent = new Intent(requireContext(), UserProfileActivity.class);
+        intent.putExtra(UserProfileActivity.EXTRA_USER_ID, userId.toString());
+        startActivity(intent);
+    }
+
+    private void refreshCategoryFilters() {
+        if (radioChannelCategories == null) {
+            return;
+        }
+        ArrayList<String> categories = AppData.getPostCategories(requireContext());
+        if (selectedCategory.isEmpty() || !categories.contains(selectedCategory)) {
+            selectedCategory = getString(R.string.category_all);
+        }
+        radioChannelCategories.setOnCheckedChangeListener(null);
+        radioChannelCategories.removeAllViews();
+        boolean firstCategory = true;
+        for (String category : categories) {
+            RadioButton button = new RadioButton(requireContext());
+            button.setId(View.generateViewId());
+            button.setText(category);
+            button.setButtonDrawable(null);
+            button.setGravity(Gravity.CENTER);
+            button.setMinWidth(dp(76));
+            button.setPadding(dp(16), 0, dp(16), 0);
+            button.setTextColor(ContextCompat.getColor(requireContext(), R.color.ink_primary));
+            button.setTextSize(15);
+            button.setTypeface(android.graphics.Typeface.DEFAULT_BOLD);
+            RadioGroup.LayoutParams params = new RadioGroup.LayoutParams(
+                    RadioGroup.LayoutParams.WRAP_CONTENT,
+                    RadioGroup.LayoutParams.MATCH_PARENT
+            );
+            if (!firstCategory) {
+                params.setMarginStart(dp(8));
+            }
+            radioChannelCategories.addView(button, params);
+            firstCategory = false;
+            if (category.equals(selectedCategory)) {
+                button.setChecked(true);
+            }
+            styleCategoryButton(button, category.equals(selectedCategory));
+        }
+        radioChannelCategories.setOnCheckedChangeListener((group, checkedId) -> {
+            RadioButton checked = group.findViewById(checkedId);
+            if (checked != null) {
+                selectedCategory = checked.getText().toString();
+                refreshContent();
+            }
+        });
+    }
+
+    private void styleCategoryButton(RadioButton button, boolean selected) {
+        GradientDrawable background = new GradientDrawable();
+        background.setShape(GradientDrawable.RECTANGLE);
+        background.setCornerRadius(dp(999));
+        background.setColor(selected
+                ? Color.argb(170, 232, 236, 243)
+                : Color.argb(74, 255, 255, 255));
+        background.setStroke(dp(1), selected
+                ? ContextCompat.getColor(requireContext(), R.color.tab_bar_stroke)
+                : Color.argb(128, 226, 229, 234));
+        button.setBackground(background);
+        button.setTextColor(ContextCompat.getColor(
+                requireContext(),
+                selected ? R.color.ink_primary : R.color.ink_secondary
+        ));
     }
 
     private MainActivity host() {
@@ -227,5 +321,121 @@ public class ChannelsFragment extends Fragment implements RefreshablePage {
 
     private int dp(int value) {
         return Math.round(value * getResources().getDisplayMetrics().density);
+    }
+
+    private String buildAiSummary(ArrayList<Post> posts, String query) {
+        if (posts == null || posts.isEmpty()) {
+            return "";
+        }
+
+        Post hotPost = posts.get(0);
+        int maxReplies = 0;
+        int maxVote = Integer.MIN_VALUE;
+        Post topVotePost = posts.get(0);
+        Message bestReply = null;
+        int bestReplyScore = Integer.MIN_VALUE;
+
+        for (Post post : posts) {
+            ArrayList<Message> msgs = AppData.getMessages(post);
+            Message root = AppData.getRootMessage(post);
+            UUID rootId = root != null ? root.id() : null;
+            int replyCount = 0;
+            for (Message m : msgs) {
+                if (rootId != null && m.id().equals(rootId)) continue;
+                replyCount++;
+                int score = AppData.getMessageVoteScore(m);
+                if (score > bestReplyScore) {
+                    bestReplyScore = score;
+                    bestReply = m;
+                }
+            }
+            if (replyCount > maxReplies) {
+                maxReplies = replyCount;
+                hotPost = post;
+            }
+            int pVote = AppData.getPostVoteScore(post);
+            if (pVote > maxVote) {
+                maxVote = pVote;
+                topVotePost = post;
+            }
+        }
+
+        String hotSummary = summarizePost(hotPost, query);
+        String topSummary = bestReply == null
+                ? summarizePost(topVotePost, query)
+                : summarizeReply(bestReply);
+        return "🔥 热议：" + limitSummary(hotSummary) + "\n"
+                + "💬 高赞：" + limitSummary(topSummary);
+    }
+
+    private String summarizePost(Post post, String query) {
+        String text = compactText(AppData.getPostTitle(post) + " " + AppData.getPostBodyPreview(post));
+        String lowered = text.toLowerCase(java.util.Locale.ROOT);
+        String normalizedQuery = query == null ? "" : query.trim();
+        if (containsAny(lowered, "comp", "lab", "cpu", "digital", "课程", "作业", "考试")) {
+            return "课程压力集中";
+        }
+        if (containsAny(lowered, "reply", "replies", "comment", "nest", "缩进", "回复", "评论")) {
+            return "回复层级要清晰";
+        }
+        if (containsAny(lowered, "reddit", "feed", "layout", "首页", "信息流", "版式")) {
+            return "首页更像信息流";
+        }
+        if (containsAny(lowered, "image", "photo", "logo", "图片", "配图", "标志")) {
+            return "配图呈现要干净";
+        }
+        if (containsAny(lowered, "search", "keyboard", "搜索", "键盘")) {
+            return "搜索体验要稳定";
+        }
+        if (!normalizedQuery.isEmpty()) {
+            return normalizedQuery + "讨论升温";
+        }
+        return text.isEmpty() ? "讨论正在升温" : text;
+    }
+
+    private String summarizeReply(Message reply) {
+        String text = compactText(reply == null ? "" : reply.message());
+        String lowered = text.toLowerCase(java.util.Locale.ROOT);
+        if (containsAny(lowered, "agree", "same", "赞成", "同意")) {
+            return "多数赞成这个方向";
+        }
+        if (containsAny(lowered, "clear", "obvious", "清楚", "明显")) {
+            return "结构清楚最重要";
+        }
+        if (containsAny(lowered, "mistake", "debug", "错误", "调试")) {
+            return "调试痛点明显";
+        }
+        if (containsAny(lowered, "reply", "nest", "thread", "回复", "层级")) {
+            return "回复层级需保留";
+        }
+        return text.isEmpty() ? "高赞观点集中" : text;
+    }
+
+    private boolean containsAny(String text, String... needles) {
+        for (String needle : needles) {
+            if (text.contains(needle)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private String compactText(String text) {
+        if (text == null) {
+            return "";
+        }
+        return text.replace('\n', ' ')
+                .replaceAll("\\s+", " ")
+                .replaceAll("[\"“”‘’]", "")
+                .trim();
+    }
+
+    private String limitSummary(String text) {
+        String compact = compactText(text);
+        int maxLength = 18;
+        if (compact.length() <= maxLength) {
+            return compact;
+        }
+        return compact.substring(0, maxLength - 1) + "…";
     }
 }

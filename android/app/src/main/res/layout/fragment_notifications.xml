@@ -14,6 +14,66 @@
         android:textColor="@color/ink_primary"
         android:textStyle="bold" />
 
+    <HorizontalScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="14dp"
+        android:overScrollMode="never"
+        android:scrollbars="none">
+
+        <RadioGroup
+            android:id="@+id/radioNotificationFilters"
+            android:layout_width="wrap_content"
+            android:layout_height="42dp"
+            android:orientation="horizontal">
+
+            <RadioButton
+                android:id="@+id/filterNotificationsAll"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:buttonTint="@color/ink_primary"
+                android:checked="true"
+                android:text="@string/filter_all"
+                android:textColor="@color/ink_primary" />
+
+            <RadioButton
+                android:id="@+id/filterNotificationsLikes"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_marginStart="12dp"
+                android:buttonTint="@color/ink_primary"
+                android:text="@string/filter_likes"
+                android:textColor="@color/ink_primary" />
+
+            <RadioButton
+                android:id="@+id/filterNotificationsBookmarks"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_marginStart="12dp"
+                android:buttonTint="@color/ink_primary"
+                android:text="@string/filter_bookmarks"
+                android:textColor="@color/ink_primary" />
+
+            <RadioButton
+                android:id="@+id/filterNotificationsComments"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_marginStart="12dp"
+                android:buttonTint="@color/ink_primary"
+                android:text="@string/filter_comments"
+                android:textColor="@color/ink_primary" />
+
+            <RadioButton
+                android:id="@+id/filterNotificationsMentions"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_marginStart="12dp"
+                android:buttonTint="@color/ink_primary"
+                android:text="@string/filter_mentions"
+                android:textColor="@color/ink_primary" />
+        </RadioGroup>
+    </HorizontalScrollView>
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerNotifications"
         android:layout_width="match_parent"
